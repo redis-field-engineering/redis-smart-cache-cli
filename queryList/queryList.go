@@ -20,6 +20,8 @@ type Model struct {
 	Queries      []*RedisCommon.Query
 	pendingRules map[string]RedisCommon.Rule
 	Selection    int
+	rdb          *redis.Client
+	committed    bool
 }
 
 var (
@@ -50,8 +52,13 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) updateFooter() table.Model {
 
+	successfullyCommittedText := ""
+	if m.committed {
+		successfullyCommittedText = "Successfuly Commited Rules to Redis!           "
+	}
 	footerText := fmt.Sprintf(
-		"Pg. %d/%d - Pending Updates: %d",
+		"%sPg. %d/%d - Pending Updates: %d",
+		successfullyCommittedText,
 		m.table.CurrentPage(),
 		m.table.MaxPages(),
 		len(m.pendingRules),
@@ -97,9 +104,45 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				QueryIds: []string{m.Queries[m.Selection].Id},
 			}
 		}
+	case ConfirmationDialog.ConfirmationMessage:
+		if msg.ConfirmedUpdate {
+			err := m.CommitRuleUpdate()
+			if err == nil {
+				ResetModel(&m)
+				m.committed = true
+			}
+		}
+
+		return m, cmd
 	}
 
 	return m, cmd
+}
+
+func ResetModel(m *Model) {
+	queries, err := RedisCommon.GetQueries(m.rdb)
+
+	if err != nil {
+		println(err)
+	}
+
+	rows := make([]table.Row, len(queries))
+	for i, q := range queries {
+		rows[i] = q.GetAsRow(i)
+	}
+
+	m.table = m.table.WithRows(rows)
+	m.pendingRules = make(map[string]RedisCommon.Rule)
+}
+
+func (m Model) CommitRuleUpdate() error {
+	rulesToCommit := make([]RedisCommon.Rule, 0)
+	for _, rule := range m.pendingRules {
+		rulesToCommit = append(rulesToCommit, rule)
+	}
+
+	_, err := RedisCommon.CommitNewRules(m.rdb, rulesToCommit)
+	return err
 }
 
 func (m Model) View() string {
@@ -145,6 +188,7 @@ func InitialModel(pm tea.Model) Model {
 		Queries:      queries,
 		parentModel:  pm,
 		pendingRules: make(map[string]RedisCommon.Rule),
+		rdb:          rdb,
 	}
 	model.table = model.updateFooter()
 

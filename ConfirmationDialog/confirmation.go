@@ -22,10 +22,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		s := msg.String()
 		switch s {
-		case tea.KeyEsc.String(), tea.KeyCtrlC.String():
+		case tea.KeyEsc.String(), tea.KeyCtrlC.String(), "q":
 			return m, tea.Quit
 		case "y", "Y":
-			m.parentModel.Update(ConfirmationMessage{
+			m.parentModel, _ = m.parentModel.Update(ConfirmationMessage{
 				ConfirmedUpdate: true,
 			})
 			return m.parentModel, cmd

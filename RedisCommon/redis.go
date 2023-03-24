@@ -353,7 +353,7 @@ func NewRule(id string, ttl string) *Rule {
 	}
 }
 
-func CommitNewRules(rdb *redis.Client, rules []*Rule) error {
+func CommitNewRules(rdb *redis.Client, rules []Rule) (string, error) {
 	args := []interface{}{"JSON.ARRINSERT", "smartcache:config", "$.rules", "0"}
 
 	for _, rule := range rules {
@@ -367,8 +367,8 @@ func CommitNewRules(rdb *redis.Client, rules []*Rule) error {
 
 	_, err := rdb.Do(ctx, args...).Result()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "OK", nil
 }
