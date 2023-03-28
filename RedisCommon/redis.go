@@ -9,6 +9,7 @@ import (
 	"github.com/evertras/bubble-table/table"
 	"github.com/redis/go-redis/v9"
 	"regexp"
+	"rsccli/SortDialog"
 	"rsccli/util"
 	"strconv"
 	"strings"
@@ -69,19 +70,63 @@ func makeColumn(key string, title string, columnWidth int) table.Column {
 			Align(lipgloss.Center))
 }
 
-func GetColumnsOfQuery() []table.Column {
-	columns := []table.Column{
-		makeColumn("Id", "Id", 20),
-		makeColumn("Pending Rule", "Pending Rule", 20),
-		makeColumn("Key", "Key", 20),
-		makeColumn("Table", "Table", 20),
-		makeColumn("Sql", "Sql", 20),
-		makeColumn("Access Frequency", "Access Frequency", 20),
-		makeColumn("Mean Query Time", "Mean Query Time", 20),
-		makeColumn("Current ttl", "Current ttl", 20),
+func GetColumnNames() []string {
+	return []string{
+		"Id",
+		"Pending Rule",
+		"Key",
+		"Table",
+		"Sql",
+		"Access Frequency",
+		"Mean Query Time",
+		"Current ttl",
+	}
+}
+
+func CreateColumns(sortColumn string, direction SortDialog.Direction, colNames []string, colWidth int) []table.Column {
+	columns := make(map[string]table.Column)
+
+	for _, colName := range colNames {
+		columns[colName] = makeColumn(colName, colName, colWidth)
+	}
+	_, ok := columns[sortColumn]
+
+	if ok {
+		var symbol string
+		if direction == SortDialog.Ascending {
+			symbol = "↑"
+		} else {
+			symbol = "↓"
+		}
+		columns[sortColumn] = makeColumn(sortColumn, fmt.Sprintf("%s %s", sortColumn, symbol), colWidth)
 	}
 
-	return columns
+	ret := make([]table.Column, len(colNames))
+	for i, c := range colNames {
+		ret[i] = columns[c]
+	}
+
+	return ret
+}
+
+func GetColumnsOfRule(sortColumn string, direction SortDialog.Direction) []table.Column {
+	colWidth := 30
+	colNames := []string{
+		"TTL", "Tables", "Tables All", "Tables Any", "Query Ids", "Regex",
+	}
+
+	cols := CreateColumns(sortColumn, direction, colNames, colWidth)
+	cols = append([]table.Column{makeColumn("RowId", "Application Order", colWidth)}, cols...)
+	return cols
+}
+
+func GetColumnsOfQuery(sortColumn string, direction SortDialog.Direction) []table.Column {
+
+	colNames := []string{
+		"Id", "Pending Rule", "Key", "Table", "Sql", "Access Frequency", "Mean Query Time", "Current ttl",
+	}
+
+	return CreateColumns(sortColumn, direction, colNames, 20)
 }
 
 func (query *Query) GetAsRow(rowId int) table.Row {
@@ -154,7 +199,7 @@ type Rule struct {
 	Tables    []string `json:"tables"`
 	TablesAny []string `json:"tablesAny"`
 	TablesAll []string `json:"tablesAll"`
-	Regex     []string `json:"regex"`
+	Regex     string   `json:"regex"`
 	QueryIds  []string `json:"queryIds"`
 	Ttl       string   `json:"ttl"`
 }
@@ -269,6 +314,40 @@ func contains(s []string, str string) bool {
 	return false
 }
 
+func (r Rule) AsRow(rowId int) table.Row {
+
+	rd := table.RowData{}
+	rd["TTL"] = r.Ttl
+	if r.Tables != nil {
+		rd["Tables"] = strings.Join(r.TablesAll, ",")
+	} else {
+		rd["Tables"] = ""
+	}
+
+	if r.TablesAny != nil {
+		rd["Tables Any"] = strings.Join(r.TablesAny, ",")
+	} else {
+		rd["Tables Any"] = ""
+	}
+
+	if r.TablesAll != nil {
+		rd["Tables All"] = strings.Join(r.TablesAll, ",")
+	} else {
+		rd["Tables All"] = ""
+	}
+
+	if r.TablesAny != nil {
+		rd["Query Ids"] = strings.Join(r.QueryIds, ",")
+	} else {
+		rd["Query Ids"] = ""
+	}
+
+	rd["Regex"] = r.Regex
+	rd["RowId"] = rowId
+
+	return table.NewRow(rd)
+}
+
 func GetRules(rdb *redis.Client) ([]Rule, error) {
 	res, err := rdb.Do(ctx, "JSON.GET", "smartcache:config", "$.rules[*]").Result()
 	if err != nil {
@@ -319,14 +398,9 @@ func MatchRule(query *Query, rules []Rule) {
 			return
 		}
 
-		match = false
-		for _, regex := range rule.Regex {
-			matches, err := regexp.MatchString(regex, query.Sql)
-			if err != nil {
-				continue
-			}
-
-			match = match || matches
+		match, err := regexp.MatchString(rule.Regex, query.Sql)
+		if err != nil {
+			match = false
 		}
 
 		if match {
@@ -339,7 +413,7 @@ func MatchRule(query *Query, rules []Rule) {
 			return
 		}
 
-		if rule.TablesAny == nil && rule.Tables == nil && rule.TablesAll == nil && rule.Regex == nil && rule.QueryIds == nil {
+		if rule.TablesAny == nil && rule.Tables == nil && rule.TablesAll == nil && rule.Regex == "" && rule.QueryIds == nil {
 			query.Rule = &rule
 			return
 		}

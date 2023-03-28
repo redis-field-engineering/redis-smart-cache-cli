@@ -5,7 +5,11 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/redis/go-redis/v9"
 	"io"
+	"rsccli/ConfirmationDialog"
+	"rsccli/RuleDialog"
+	"rsccli/RuleList"
 	"rsccli/queryList"
 )
 
@@ -13,8 +17,10 @@ const listHeight = 14
 
 type Model struct {
 	list     list.Model
+	message  string
 	Choice   string
 	quitting bool
+	rdb      *redis.Client
 }
 
 var (
@@ -41,7 +47,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 		return
 	}
 
-	str := fmt.Sprintf("%d. %s", index+1, i)
+	str := fmt.Sprintf("%s", i)
 
 	fn := itemStyle.Render
 	if index == m.Index() {
@@ -59,6 +65,9 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case ConfirmationDialog.ConfirmationMessage:
+		m.Choice = ""
+		m.message = msg.Message
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
 		return m, nil
@@ -72,7 +81,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.Choice = string(i)
 				if string(i) == "List Queries" {
-					return queryList.InitialModel(m), nil
+					return queryList.InitialModel(m, m.rdb), nil
+				} else if string(i) == "Create Rule" {
+					return RuleDialog.New(m, m.rdb, nil), nil
+				} else if string(i) == "Rule List" {
+					return RuleList.New(m, m.rdb), nil
 				}
 			}
 			return m, tea.Quit
@@ -91,13 +104,14 @@ func (m Model) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Goodbye")
 	}
-	return "\n" + m.list.View()
+	return "\n" + m.list.View() + "\n" + m.message
 }
 
-func InitialModel() Model {
+func InitialModel(rdb *redis.Client) Model {
 	items := []list.Item{
 		item("List Queries"),
-		item("Check Configuration"),
+		item("Rule List"),
+		item("Create Rule"),
 	}
 
 	const defaultWidth = 20
@@ -109,5 +123,5 @@ func InitialModel() Model {
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
-	return Model{list: l}
+	return Model{list: l, rdb: rdb}
 }

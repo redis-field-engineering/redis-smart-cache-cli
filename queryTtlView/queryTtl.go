@@ -1,9 +1,11 @@
 package queryTtlView
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"regexp"
 	"rsccli/RedisCommon"
 )
 
@@ -20,6 +22,7 @@ type Model struct {
 	query       *RedisCommon.Query
 	pendingTtl  string
 	parentModel *tea.Model
+	err         string
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -31,9 +34,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyEsc, tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEnter:
-			//m.parentModel.UpdateCurrentTtl(m.textInput.Value())
-			(*m.parentModel).Update(SetPendingTtlMsg{Ttl: m.textInput.Value()})
-			return *m.parentModel, cmd
+			err := validateTimeout(m.textInput.Value())
+			if err != nil {
+				m.err = "\n" + err.Error()
+			} else {
+				(*m.parentModel).Update(SetPendingTtlMsg{Ttl: m.textInput.Value()})
+				return *m.parentModel, cmd
+			}
 		}
 	}
 
@@ -42,7 +49,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nInput TTL in the form of a duration:\n%s", m.query.Formatted(), m.textInput.View())
+	return fmt.Sprintf("%s\n\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(), m.textInput.View(), m.err)
+}
+
+func validateTimeout(input string) error {
+	pattern := "^\\s*(\\d+(?:\\.\\d+)?)\\s*([a-zA-Z]+)\\s*$"
+	matched, err := regexp.MatchString(pattern, input)
+	if err != nil {
+		return err
+	}
+
+	if !matched {
+
+		if !matched {
+			return errors.New("inputted duration did not match pattern")
+		}
+
+	}
+	return nil
 }
 
 func New(query *RedisCommon.Query, pm tea.Model) Model {

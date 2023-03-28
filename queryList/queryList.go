@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"rsccli/ConfirmationDialog"
 	"rsccli/RedisCommon"
+	"rsccli/SortDialog"
 	"rsccli/queryTtlView"
 	"strings"
 )
@@ -15,13 +16,15 @@ import (
 const listHeight = 14
 
 type Model struct {
-	parentModel  tea.Model
-	table        table.Model
-	Queries      []*RedisCommon.Query
-	pendingRules map[string]RedisCommon.Rule
-	Selection    int
-	rdb          *redis.Client
-	committed    bool
+	parentModel   tea.Model
+	table         table.Model
+	Queries       []*RedisCommon.Query
+	pendingRules  map[string]RedisCommon.Rule
+	Selection     int
+	rdb           *redis.Client
+	committed     bool
+	sortColumn    string
+	sortDirection SortDialog.Direction
 }
 
 var (
@@ -92,17 +95,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.table = m.table.WithHeaderVisibility(!m.table.GetHeaderVisibility())
 		case "c":
 			return ConfirmationDialog.New(m, m.pendingRules), cmd
+		case "s":
+			return SortDialog.New(RedisCommon.GetColumnNames(), m), nil
 		}
 	case queryTtlView.SetPendingTtlMsg:
 		m.table.HighlightedRow().Data["Pending Rule"] = msg.Ttl
 		r, ok := m.pendingRules[msg.Ttl]
 		if ok {
 			r.QueryIds = append(r.QueryIds, m.Queries[m.Selection].Id)
+			m.pendingRules[msg.Ttl] = r
 		} else {
 			m.pendingRules[msg.Ttl] = RedisCommon.Rule{
 				Ttl:      msg.Ttl,
 				QueryIds: []string{m.Queries[m.Selection].Id},
 			}
+		}
+	case SortDialog.SortMessage:
+		columns := RedisCommon.GetColumnsOfQuery(msg.Choice, msg.Direction)
+		if msg.Direction == SortDialog.Descending {
+			m.table = m.table.WithColumns(columns).SortByDesc(msg.Choice)
+		} else {
+			m.table = m.table.WithColumns(columns).SortByAsc(msg.Choice)
 		}
 	case ConfirmationDialog.ConfirmationMessage:
 		if msg.ConfirmedUpdate {
@@ -162,11 +175,8 @@ func (m Model) View() string {
 	return body.String()
 }
 
-func InitialModel(pm tea.Model) Model {
-	rdb := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
-		DB:   0,
-	})
+func InitialModel(pm tea.Model, rdb *redis.Client) Model {
+
 	queries, err := RedisCommon.GetQueries(rdb)
 
 	if err != nil {
@@ -178,13 +188,13 @@ func InitialModel(pm tea.Model) Model {
 		rows[i] = q.GetAsRow(i)
 	}
 	model := Model{
-		table: table.New(RedisCommon.GetColumnsOfQuery()).
+		table: table.New(RedisCommon.GetColumnsOfQuery("Mean Query Time", SortDialog.Descending)).
 			WithRows(rows).
 			HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
 			Focused(true).
 			Border(customBorder).
 			WithPageSize(5).
-			SortByDesc("Mean Query Time"),
+			SortByDesc("Mean Query Time").WithTargetWidth(200),
 		Queries:      queries,
 		parentModel:  pm,
 		pendingRules: make(map[string]RedisCommon.Rule),

@@ -12,6 +12,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 type ConfirmationMessage struct {
+	Message         string
 	ConfirmedUpdate bool
 }
 
@@ -26,6 +27,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "y", "Y":
 			m.parentModel, _ = m.parentModel.Update(ConfirmationMessage{
+				Message:         "Rule Updates Committed to Redis.",
 				ConfirmedUpdate: true,
 			})
 			return m.parentModel, cmd
