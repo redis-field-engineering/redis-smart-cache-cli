@@ -97,6 +97,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return ConfirmationDialog.New(m, m.pendingRules), cmd
 		case "s":
 			return SortDialog.New(RedisCommon.GetColumnNames(), m), nil
+		case "b":
+			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
+			return m.parentModel, nil
 		}
 	case queryTtlView.SetPendingTtlMsg:
 		m.table.HighlightedRow().Data["Pending Rule"] = msg.Ttl

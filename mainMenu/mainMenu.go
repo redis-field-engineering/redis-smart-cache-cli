@@ -65,6 +65,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
 	case ConfirmationDialog.ConfirmationMessage:
 		m.Choice = ""
 		m.message = msg.Message
@@ -83,7 +84,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if string(i) == "List Queries" {
 					return queryList.InitialModel(m, m.rdb), nil
 				} else if string(i) == "Create Rule" {
-					return RuleDialog.New(m, m.rdb, nil), nil
+					return RuleDialog.New(m, m.rdb, nil, true), nil
 				} else if string(i) == "Rule List" {
 					return RuleList.New(m, m.rdb), nil
 				}

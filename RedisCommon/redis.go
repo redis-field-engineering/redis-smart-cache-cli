@@ -8,9 +8,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
 	"github.com/redis/go-redis/v9"
+	"hash/fnv"
+	"reflect"
 	"regexp"
 	"rsccli/SortDialog"
 	"rsccli/util"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -116,7 +119,15 @@ func GetColumnsOfRule(sortColumn string, direction SortDialog.Direction) []table
 	}
 
 	cols := CreateColumns(sortColumn, direction, colNames, colWidth)
-	cols = append([]table.Column{makeColumn("RowId", "Application Order", colWidth)}, cols...)
+	var symbol string
+	if sortColumn == "RowId" {
+		if direction == SortDialog.Ascending {
+			symbol = " ↑"
+		} else {
+			symbol = " ↓"
+		}
+	}
+	cols = append([]table.Column{makeColumn("RowId", fmt.Sprintf("Rule Precedence%s", symbol), colWidth)}, cols...)
 	return cols
 }
 
@@ -195,11 +206,15 @@ func (r Rule) GetJson() string {
 	return string(b)
 }
 
+func (r Rule) Equal(other Rule) bool {
+	return reflect.DeepEqual(r, other)
+}
+
 type Rule struct {
 	Tables    []string `json:"tables"`
 	TablesAny []string `json:"tablesAny"`
 	TablesAll []string `json:"tablesAll"`
-	Regex     string   `json:"regex"`
+	Regex     *string  `json:"regex"`
 	QueryIds  []string `json:"queryIds"`
 	Ttl       string   `json:"ttl"`
 }
@@ -319,7 +334,7 @@ func (r Rule) AsRow(rowId int) table.Row {
 	rd := table.RowData{}
 	rd["TTL"] = r.Ttl
 	if r.Tables != nil {
-		rd["Tables"] = strings.Join(r.TablesAll, ",")
+		rd["Tables"] = strings.Join(r.Tables, ",")
 	} else {
 		rd["Tables"] = ""
 	}
@@ -336,13 +351,18 @@ func (r Rule) AsRow(rowId int) table.Row {
 		rd["Tables All"] = ""
 	}
 
-	if r.TablesAny != nil {
+	if r.QueryIds != nil {
 		rd["Query Ids"] = strings.Join(r.QueryIds, ",")
 	} else {
 		rd["Query Ids"] = ""
 	}
 
-	rd["Regex"] = r.Regex
+	if r.Regex != nil {
+		rd["Regex"] = r.Regex
+	} else {
+		rd["Regex"] = ""
+	}
+
 	rd["RowId"] = rowId
 
 	return table.NewRow(rd)
@@ -398,14 +418,17 @@ func MatchRule(query *Query, rules []Rule) {
 			return
 		}
 
-		match, err := regexp.MatchString(rule.Regex, query.Sql)
-		if err != nil {
-			match = false
-		}
+		if rule.Regex != nil {
+			match, err := regexp.MatchString(*rule.Regex, query.Sql)
+			if err != nil {
+				match = false
+			}
 
-		if match {
-			query.Rule = &rule
-			return
+			if match {
+				query.Rule = &rule
+				return
+			}
+
 		}
 
 		if contains(rule.QueryIds, query.Id) {
@@ -413,7 +436,7 @@ func MatchRule(query *Query, rules []Rule) {
 			return
 		}
 
-		if rule.TablesAny == nil && rule.Tables == nil && rule.TablesAll == nil && rule.Regex == "" && rule.QueryIds == nil {
+		if rule.TablesAny == nil && rule.Tables == nil && rule.TablesAll == nil && rule.Regex == nil && rule.QueryIds == nil {
 			query.Rule = &rule
 			return
 		}
@@ -425,6 +448,28 @@ func NewRule(id string, ttl string) *Rule {
 		QueryIds: []string{id},
 		Ttl:      ttl,
 	}
+}
+
+func (r Rule) Hash() uint64 {
+	h := fnv.New64a()
+	h.Write([]byte(string(r.Ttl)))
+	for _, s := range r.QueryIds {
+		h.Write([]byte(string(s)))
+	}
+	for _, s := range r.Tables {
+		h.Write([]byte(string(s)))
+	}
+	for _, s := range r.TablesAny {
+		h.Write([]byte(string(s)))
+	}
+	for _, s := range r.TablesAll {
+		h.Write([]byte(string(s)))
+	}
+	if r.Regex != nil {
+		h.Write([]byte(string(*r.Regex)))
+	}
+
+	return h.Sum64()
 }
 
 func CommitNewRules(rdb *redis.Client, rules []Rule) (string, error) {
@@ -445,4 +490,46 @@ func CommitNewRules(rdb *redis.Client, rules []Rule) (string, error) {
 	}
 
 	return "OK", nil
+}
+
+func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rule, rulesToDelete map[int]Rule) {
+	pipeline := rdb.Pipeline()
+	for index, rule := range rulesToUpdate {
+		b, err := json.Marshal(rule)
+		if err != nil {
+			fmt.Printf("Unalbe to update rule: %s\n", err)
+			continue
+		}
+		pipeline.Do(ctx, "JSON.SET", "smartcache:config", fmt.Sprintf("$.rules[%d]", index), string(b))
+	}
+
+	indexesToPop := make([]int, len(rulesToDelete))
+	i := 0
+	for index, _ := range rulesToDelete {
+		indexesToPop[i] = index
+		i++
+	}
+
+	sort.Slice(indexesToPop, func(i, j int) bool {
+		return indexesToPop[i] > indexesToPop[j]
+	})
+
+	for _, i := range indexesToPop {
+		pipeline.Do(ctx, "JSON.ARRPOP", "smartcache:config", "$.rules", i)
+	}
+
+	for _, rule := range rulesToAdd {
+		b, err := json.Marshal(rule)
+		if err != nil {
+			fmt.Printf("Unalbe to update rule: %s\n", err)
+			continue
+		}
+		pipeline.Do(ctx, "JSON.ARRINSERT", "smartcache:config", "$.rules", "0", string(b))
+	}
+
+	_, err := pipeline.Exec(ctx)
+
+	if err != nil {
+		fmt.Println(fmt.Sprintf("encountered error: %s\n", err))
+	}
 }

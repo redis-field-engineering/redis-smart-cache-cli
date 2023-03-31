@@ -24,6 +24,11 @@ var (
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
+type RuleMsg struct {
+	Rule  RedisCommon.Rule
+	IsNew bool
+}
+
 type Model struct {
 	focusIndex   int
 	inputs       []textinput.Model
@@ -32,14 +37,18 @@ type Model struct {
 	error        string
 	parentModel  tea.Model
 	rdb          *redis.Client
+	confirm      bool
+	isNew        bool
 }
 
-func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule) Model {
+func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool) Model {
 	m := Model{
 		inputs:       make([]textinput.Model, 6),
 		instructions: make([]string, 6),
 		parentModel:  parentModel,
 		rdb:          rdb,
+		confirm:      confirm,
+		isNew:        rule == nil,
 	}
 
 	var t textinput.Model
@@ -88,8 +97,8 @@ func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule) Model
 			}
 		case 5:
 			m.instructions[i] = "Match if the SQL query matches this Regex:						"
-			if rule != nil && rule.Regex != "" {
-				t.SetValue(rule.Regex)
+			if rule != nil && rule.Regex != nil {
+				t.SetValue(*rule.Regex)
 			} else {
 				t.Placeholder = "Regex"
 			}
@@ -132,7 +141,8 @@ func (m Model) GetRuleFromModel() (*RedisCommon.Rule, error) {
 	}
 
 	if m.inputs[5].Value() != "Regex" && m.inputs[5].Value() != "" {
-		rule.Regex = m.inputs[5].Value()
+		v := m.inputs[5].Value()
+		rule.Regex = &v
 	}
 
 	return &rule, nil
@@ -154,8 +164,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.parentModel, nil
 	case tea.KeyMsg:
 		switch msg.String() {
-		case tea.KeyCtrlC.String(), tea.KeyEsc.String(), "q":
+		case tea.KeyCtrlC.String(), tea.KeyEsc.String():
 			return m, tea.Quit
+		case "q":
+			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
+			return m.parentModel, nil
 		case tea.KeyTab.String(), tea.KeyShiftTab.String(), tea.KeyEnter.String(), tea.KeyUp.String(), tea.KeyDown.String():
 			s := msg.String()
 			if s == "enter" && m.focusIndex == len(m.inputs) {
@@ -163,6 +176,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					m.error = err.Error()
 					return m, nil
+				}
+
+				if !m.confirm {
+					respMsg := RuleMsg{
+						Rule:  *rule,
+						IsNew: m.isNew,
+					}
+
+					m.parentModel, _ = m.parentModel.Update(respMsg)
+					return m.parentModel, nil
 				}
 
 				ruleMap := make(map[string]RedisCommon.Rule)
