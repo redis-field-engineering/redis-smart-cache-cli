@@ -169,7 +169,8 @@ func (m Model) View() string {
 	body.WriteString("Press 'i' to toggle the header visibility\n")
 	body.WriteString("Press space/enter to create a pending rule\n")
 	body.WriteString("Press 'c' to commit selected rules\n")
-	body.WriteString("Press q or ctrl+c to quit\n")
+	body.WriteString("Press 'q' or ctrl+c to quit\n")
+	body.WriteString("Press 'b' to go back\n")
 
 	body.WriteString(m.table.View())
 

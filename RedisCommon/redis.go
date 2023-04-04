@@ -184,7 +184,7 @@ func (query *Query) GetRow(colWidth int) string {
 }
 
 func GetHeader(colWidth int) string {
-	row := "  |"
+	row := "|"
 	row += util.CenterString("id", colWidth) + "|"
 	row += util.CenterString("Pending TTL", colWidth) + "|"
 	row += util.CenterString("keyName", colWidth) + "|"
