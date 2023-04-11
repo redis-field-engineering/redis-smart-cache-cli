@@ -7,10 +7,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/redis/go-redis/v9"
 	"io"
-	"rsccli/ConfirmationDialog"
-	"rsccli/RuleDialog"
-	"rsccli/RuleList"
-	"rsccli/queryList"
+	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RuleDialog"
+	"smart-cache-cli/RuleList"
+	"smart-cache-cli/queryList"
 )
 
 const listHeight = 14

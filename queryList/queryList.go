@@ -6,10 +6,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
 	"github.com/redis/go-redis/v9"
-	"rsccli/ConfirmationDialog"
-	"rsccli/RedisCommon"
-	"rsccli/SortDialog"
-	"rsccli/queryTtlView"
+	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RedisCommon"
+	"smart-cache-cli/SortDialog"
+	"smart-cache-cli/queryTtlView"
 	"strings"
 )
 

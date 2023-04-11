@@ -1,7 +1,7 @@
 package main
 
 import (
-	"rsccli/cmd"
+	"smart-cache-cli/cmd"
 )
 
 func main() {

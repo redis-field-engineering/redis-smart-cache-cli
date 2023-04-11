@@ -1,4 +1,4 @@
-module rsccli
+module smart-cache-cli
 
 go 1.20
 

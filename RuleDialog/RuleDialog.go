@@ -7,8 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/redis/go-redis/v9"
-	"rsccli/ConfirmationDialog"
-	"rsccli/RedisCommon"
+	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RedisCommon"
 	"strings"
 )
 

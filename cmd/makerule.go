@@ -7,8 +7,8 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/redis/go-redis/v9"
-	"rsccli/ConfirmationDialog"
-	"rsccli/RedisCommon"
+	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RedisCommon"
 	"strings"
 
 	"github.com/spf13/cobra"

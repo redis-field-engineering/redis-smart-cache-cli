@@ -5,7 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/redis/go-redis/v9"
-	"rsccli/RedisCommon"
+	"smart-cache-cli/RedisCommon"
 	"strings"
 )
 

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"os"
-	"rsccli/RedisCommon"
+	"smart-cache-cli/RedisCommon"
 	"sort"
 	"strings"
 

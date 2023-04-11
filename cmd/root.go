@@ -6,7 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"os"
-	"rsccli/mainMenu"
+	"smart-cache-cli/mainMenu"
 )
 
 // rootCmd represents the base command when called without any subcommands

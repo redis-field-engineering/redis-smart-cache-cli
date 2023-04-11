@@ -3,7 +3,7 @@ package ConfirmationDialog
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"rsccli/RedisCommon"
+	"smart-cache-cli/RedisCommon"
 	"strings"
 )
 

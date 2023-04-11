@@ -5,12 +5,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
 	"github.com/redis/go-redis/v9"
-	"rsccli/BulkUpdateConfirmation"
-	"rsccli/ConfirmationDialog"
-	"rsccli/RedisCommon"
-	"rsccli/RuleDialog"
-	"rsccli/SortDialog"
-	"rsccli/util"
+	"smart-cache-cli/BulkUpdateConfirmation"
+	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RedisCommon"
+	"smart-cache-cli/RuleDialog"
+	"smart-cache-cli/SortDialog"
+	"smart-cache-cli/util"
 	"strings"
 )
 
