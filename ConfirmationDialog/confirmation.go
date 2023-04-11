@@ -26,16 +26,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyEsc.String(), tea.KeyCtrlC.String(), "q":
 			return m, tea.Quit
 		case "y", "Y":
+			if m.parentModel == nil {
+				m.Confirmed = true
+				return m, tea.Quit
+			}
 			m.parentModel, _ = m.parentModel.Update(ConfirmationMessage{
 				Message:         "Rule Updates Committed to Redis.",
 				ConfirmedUpdate: true,
 			})
 			return m.parentModel, cmd
+
 		case "n", "N":
+			if m.parentModel == nil {
+				m.Confirmed = false
+				return m, tea.Quit
+			}
 			m.parentModel.Update(ConfirmationMessage{
 				ConfirmedUpdate: false,
 			})
 			return m.parentModel, cmd
+
 		}
 	}
 
@@ -57,6 +67,7 @@ type Model struct {
 	parentModel  tea.Model
 	inputMode    textinput.Model
 	pendingRules map[string]RedisCommon.Rule
+	Confirmed    bool
 }
 
 func New(parentModel tea.Model, pendingRules map[string]RedisCommon.Rule) Model {
