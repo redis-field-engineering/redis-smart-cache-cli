@@ -28,7 +28,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyEsc.String(), tea.KeyCtrlC.String(), "q":
 			return m, tea.Quit
 		case "y", "Y":
-			RedisCommon.UpdateRules(m.rdb, m.rulesToAdd, m.rulesToUpdate, m.rulesToDelete)
+			RedisCommon.UpdateRules(m.rdb, m.rulesToAdd, m.rulesToUpdate, m.rulesToDelete, m.applicationName)
 			m.parentModel, _ = m.parentModel.Update(BulkConfirmationMessage{
 				Message:         "Rule Updates Committed to Redis.",
 				ConfirmedUpdate: true,
@@ -74,23 +74,25 @@ func (m Model) View() string {
 }
 
 type Model struct {
-	parentModel   tea.Model
-	inputMode     textinput.Model
-	rulesToAdd    []RedisCommon.Rule
-	rulesToUpdate map[int]RedisCommon.Rule
-	rulesToDelete map[int]RedisCommon.Rule
-	rdb           *redis.Client
+	parentModel     tea.Model
+	inputMode       textinput.Model
+	rulesToAdd      []RedisCommon.Rule
+	rulesToUpdate   map[int]RedisCommon.Rule
+	rulesToDelete   map[int]RedisCommon.Rule
+	rdb             *redis.Client
+	applicationName string
 }
 
-func New(parentModel tea.Model, rulesToAdd []RedisCommon.Rule, rulesToUpdate map[int]RedisCommon.Rule, rulesToDelete map[int]RedisCommon.Rule, rdb *redis.Client) Model {
+func New(parentModel tea.Model, rulesToAdd []RedisCommon.Rule, rulesToUpdate map[int]RedisCommon.Rule, rulesToDelete map[int]RedisCommon.Rule, rdb *redis.Client, applicationName string) Model {
 	ti := textinput.New()
 	ti.Focus()
 	return Model{
-		parentModel:   parentModel,
-		inputMode:     ti,
-		rulesToAdd:    rulesToAdd,
-		rulesToDelete: rulesToDelete,
-		rulesToUpdate: rulesToUpdate,
-		rdb:           rdb,
+		parentModel:     parentModel,
+		inputMode:       ti,
+		rulesToAdd:      rulesToAdd,
+		rulesToDelete:   rulesToDelete,
+		rulesToUpdate:   rulesToUpdate,
+		rdb:             rdb,
+		applicationName: applicationName,
 	}
 }

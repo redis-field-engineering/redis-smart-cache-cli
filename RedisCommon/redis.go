@@ -234,12 +234,12 @@ func ToLabelsMap(res []interface{}) map[string]string {
 	return m
 }
 
-func GetQueries(rdb *redis.Client) ([]*Query, error) {
+func GetQueries(rdb *redis.Client, applicationName string) ([]*Query, error) {
 	res, err := rdb.Do(ctx, "TS.MGET", "WITHLABELS", "FILTER", "name=query", "stat=(count,mean)").Result()
 	if err != nil {
 		return nil, err
 	}
-	rules, err := GetRules(rdb)
+	rules, err := GetRules(rdb, applicationName)
 	if err != nil {
 		return nil, err
 	}
@@ -254,14 +254,14 @@ func GetQueries(rdb *redis.Client) ([]*Query, error) {
 	for _, item := range arr {
 		labelArr := item.([]interface{})[1]
 		labels := ToLabelsMap(labelArr.([]interface{}))
-		id := labels["query"]
+		id := labels["id"]
 
 		_, exists := queries[id]
 
 		if !exists {
 			q := new(Query)
 			q.Id = id
-			q.Key = fmt.Sprintf("smartcache:queries:%s", id)
+			q.Key = fmt.Sprintf("%s:queries:%s", applicationName, id)
 			queries[id] = q
 		}
 
@@ -283,7 +283,7 @@ func GetQueries(rdb *redis.Client) ([]*Query, error) {
 	pipeResults := make(map[string]*redis.MapStringStringCmd)
 	pipe := rdb.Pipeline()
 	for id := range queries {
-		pipeResults[id] = pipe.HGetAll(ctx, fmt.Sprintf("smartcache:queries:%s", id))
+		pipeResults[id] = pipe.HGetAll(ctx, fmt.Sprintf("%s:query:%s", applicationName, id))
 	}
 
 	_, err = pipe.Exec(ctx)
@@ -368,8 +368,8 @@ func (r Rule) AsRow(rowId int) table.Row {
 	return table.NewRow(rd)
 }
 
-func GetRules(rdb *redis.Client) ([]Rule, error) {
-	res, err := rdb.Do(ctx, "JSON.GET", "smartcache:config", "$.rules[*]").Result()
+func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
+	res, err := rdb.Do(ctx, "JSON.GET", fmt.Sprintf("%s:config", applicationName), "$.rules[*]").Result()
 	if err != nil {
 		return nil, err
 	}
@@ -472,8 +472,8 @@ func (r Rule) Hash() uint64 {
 	return h.Sum64()
 }
 
-func CommitNewRules(rdb *redis.Client, rules []Rule) (string, error) {
-	args := []interface{}{"JSON.ARRINSERT", "smartcache:config", "$.rules", "0"}
+func CommitNewRules(rdb *redis.Client, rules []Rule, applicationName string) (string, error) {
+	args := []interface{}{"JSON.ARRINSERT", fmt.Sprintf("%s:config", applicationName), "$.rules", "0"}
 
 	for _, rule := range rules {
 		b, err := json.Marshal(rule)
@@ -492,7 +492,7 @@ func CommitNewRules(rdb *redis.Client, rules []Rule) (string, error) {
 	return "OK", nil
 }
 
-func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rule, rulesToDelete map[int]Rule) {
+func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rule, rulesToDelete map[int]Rule, applicationName string) {
 	pipeline := rdb.Pipeline()
 	for index, rule := range rulesToUpdate {
 		b, err := json.Marshal(rule)
@@ -500,7 +500,7 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 			fmt.Printf("Unalbe to update rule: %s\n", err)
 			continue
 		}
-		pipeline.Do(ctx, "JSON.SET", "smartcache:config", fmt.Sprintf("$.rules[%d]", index), string(b))
+		pipeline.Do(ctx, "JSON.SET", fmt.Sprintf("%s:config", applicationName), fmt.Sprintf("$.rules[%d]", index), string(b))
 	}
 
 	indexesToPop := make([]int, len(rulesToDelete))
@@ -515,7 +515,7 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 	})
 
 	for _, i := range indexesToPop {
-		pipeline.Do(ctx, "JSON.ARRPOP", "smartcache:config", "$.rules", i)
+		pipeline.Do(ctx, "JSON.ARRPOP", fmt.Sprintf("%s:config", applicationName), "$.rules", i)
 	}
 
 	for _, rule := range rulesToAdd {
@@ -524,7 +524,7 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 			fmt.Printf("Unalbe to update rule: %s\n", err)
 			continue
 		}
-		pipeline.Do(ctx, "JSON.ARRINSERT", "smartcache:config", "$.rules", "0", string(b))
+		pipeline.Do(ctx, "JSON.ARRINSERT", fmt.Sprintf("%s:config", applicationName), "$.rules", "0", string(b))
 	}
 
 	_, err := pipeline.Exec(ctx)

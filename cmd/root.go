@@ -25,7 +25,7 @@ to quickly create a Cobra application.`,
 			Username: User,
 			DB:       0,
 		})
-		p := tea.NewProgram(mainMenu.InitialModel(rdb))
+		p := tea.NewProgram(mainMenu.InitialModel(rdb, ApplicationName))
 		if res, err := p.Run(); err != nil {
 			fmt.Printf("Alas, there's been an error: %v", err)
 			os.Exit(1)
@@ -51,6 +51,7 @@ var HostName string
 var Port string
 var User string
 var Password string
+var ApplicationName string
 
 func init() {
 	// Here you will define your flags and configuration settings.
@@ -66,4 +67,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "the port to connect to Redis on")
 	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Password for Redis")
 	rootCmd.PersistentFlags().StringVarP(&Password, "user", "u", "default", "User to authenticate to Redis with - defaults to 'default'")
+	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "The application namespace to use defaults to 'smartcache'")
 }

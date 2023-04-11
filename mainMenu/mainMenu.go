@@ -16,11 +16,12 @@ import (
 const listHeight = 14
 
 type Model struct {
-	list     list.Model
-	message  string
-	Choice   string
-	quitting bool
-	rdb      *redis.Client
+	list            list.Model
+	message         string
+	Choice          string
+	quitting        bool
+	rdb             *redis.Client
+	applicationName string
 }
 
 var (
@@ -82,11 +83,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.Choice = string(i)
 				if string(i) == "List Queries" {
-					return queryList.InitialModel(m, m.rdb), nil
+					return queryList.InitialModel(m, m.rdb, m.applicationName), nil
 				} else if string(i) == "Create Rule" {
-					return RuleDialog.New(m, m.rdb, nil, true), nil
+					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName), nil
 				} else if string(i) == "Rule List" {
-					return RuleList.New(m, m.rdb), nil
+					return RuleList.New(m, m.rdb, m.applicationName), nil
 				}
 			}
 			return m, tea.Quit
@@ -108,7 +109,7 @@ func (m Model) View() string {
 	return "\n" + m.list.View() + "\n" + m.message
 }
 
-func InitialModel(rdb *redis.Client) Model {
+func InitialModel(rdb *redis.Client, applicationName string) Model {
 	items := []list.Item{
 		item("List Queries"),
 		item("Rule List"),
@@ -124,5 +125,5 @@ func InitialModel(rdb *redis.Client) Model {
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
-	return Model{list: l, rdb: rdb}
+	return Model{list: l, rdb: rdb, applicationName: applicationName}
 }

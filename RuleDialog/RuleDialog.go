@@ -30,25 +30,27 @@ type RuleMsg struct {
 }
 
 type Model struct {
-	focusIndex   int
-	inputs       []textinput.Model
-	instructions []string
-	cursorMode   textinput.CursorMode
-	error        string
-	parentModel  tea.Model
-	rdb          *redis.Client
-	confirm      bool
-	isNew        bool
+	focusIndex      int
+	inputs          []textinput.Model
+	instructions    []string
+	cursorMode      textinput.CursorMode
+	error           string
+	parentModel     tea.Model
+	rdb             *redis.Client
+	confirm         bool
+	isNew           bool
+	applicationName string
 }
 
-func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool) Model {
+func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string) Model {
 	m := Model{
-		inputs:       make([]textinput.Model, 6),
-		instructions: make([]string, 6),
-		parentModel:  parentModel,
-		rdb:          rdb,
-		confirm:      confirm,
-		isNew:        rule == nil,
+		inputs:          make([]textinput.Model, 6),
+		instructions:    make([]string, 6),
+		parentModel:     parentModel,
+		rdb:             rdb,
+		confirm:         confirm,
+		isNew:           rule == nil,
+		applicationName: applicationName,
 	}
 
 	var t textinput.Model
@@ -153,7 +155,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ConfirmationDialog.ConfirmationMessage:
 		m.parentModel, _ = m.parentModel.Update(msg)
 		rule, _ := m.GetRuleFromModel()
-		_, err := RedisCommon.CommitNewRules(m.rdb, []RedisCommon.Rule{*rule})
+		_, err := RedisCommon.CommitNewRules(m.rdb, []RedisCommon.Rule{*rule}, m.applicationName)
 		if err != nil {
 			confMsg := ConfirmationDialog.ConfirmationMessage{
 				Message: "Failed to update Redis",
