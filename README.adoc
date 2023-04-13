@@ -95,26 +95,26 @@ To run Redis Smart Cache CLI in interactive mode, simply run the cli `smart-cach
 ==== List Queries
 The List Queries table shows you the Queries that SmartCache is currently tracking:
 
-image:.github/images/query-list-table.png[Query List Table]
+image:query-list-table.png[Query List Table]
 
 this dialog lets you pick which queries you want to create rules for, simply hit space or enter to create a pending rule. This will pop up a rule dialog which will show you expanded details of the query, and allow you to enter a new TTL for the query.
 
-image:.github/images/query-rule-dialog.png[Query Rule Dialog]
+image:query-rule-dialog.png[Query Rule Dialog]
 
 ==== List Rules
 
 The List rule dialog will show you the rules currently in force for Smart Cache. You can batch the creation, editing, or deletion of rules.
 
-image:.github/images/rule-list.png[Rule List]
+image:rule-list.png[Rule List]
 
 ==== Rule Creation
 
 The Rule creation dialog allows you to create whatever rule you want and move it to the top of the front of the rule priority list.
 
-image:.github/images/rule-creation.png[Rule Creation Dialog]
+image:rule-creation.png[Rule Creation Dialog]
 
 ==== Table List
 
 The Table list provides you a table level view of the profiling done by Smart Cache. It shows you your tables, their access frequency, the mean query time for all queries executed against them, and the current TTL of any rule that's set in Smart Cache to automatically cache queries against that table. 
 
-image:./.github/images/table-list.png[Table List]
+image:table-list.png[Table List]
