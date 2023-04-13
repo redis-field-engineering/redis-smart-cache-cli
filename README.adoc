@@ -118,3 +118,88 @@ image:rule-creation.png[Rule Creation Dialog]
 The Table list provides you a table level view of the profiling done by Smart Cache. It shows you your tables, their access frequency, the mean query time for all queries executed against them, and the current TTL of any rule that's set in Smart Cache to automatically cache queries against that table. 
 
 image:table-list.png[Table List]
+
+=== Non-Interactive Commands
+
+There are also a couple of non-interactive commands to take note of, specifically there is a way to list queries without using the interactive view, additioanlly you can create a rule without the interactive interface.
+
+==== List Queries
+
+The List queries command lists the queries that are being tracked by Smart Cache, simply run `smart-cache-cli listqueries` and it will list your queries for you
+
+image:list-queries.png[List Queries]
+
+===== List Queries flags
+
+[cols="1,1,1,1,1"]
+|===
+|Flag Name|Shortcut|Type|Description|Default
+
+|--sortDirection
+|-d
+|string
+|The direction to sort by - valid options are DESC and ASC
+|DESC
+
+|--sortby
+|-b
+|string
+|The column to sort by - valid options are 'queryTime', 'accessFrequency', 'tables', and 'id'
+|queryTime
+
+|===
+
+==== Rule Creation
+
+The `makerule` command allows you to create rules on the fly. This command is slightly interactive in that if you do not include the `y` flag, it will prompt you
+to assent to the rule's creation before pushing it to Redis.
+
+===== Rule Creation Flags
+
+[cols="1,1,1,1,1"]
+|===
+|Flag Name|Shortcut|Type|Description|required
+
+|--ttl
+|-t
+|string
+|The time to live as a duration (e.g. 5m, 300s, 2d) to enforce as the ttl for the rule.
+|yes
+
+|--confirm
+|-y
+|
+| Provide this flag if you don't want the interactive dialog to confirm you want to commit the rule
+|no
+
+|--queryIds
+|-q
+|string
+|Comma-delimited unordered set of the ids of the Queries that the rule will apply to.
+|no
+
+|--regex
+|-r
+|string
+|The regex to use to match this rule. If the regex matches, the rule wil apply
+|no
+
+|--tablesAll
+|-l
+|string
+|Comma-delimited unordered set of tables. Matches if all of the tables in the set appear in the query.
+|no
+
+|--tablesAny
+|-x
+|string
+|Comma-delimited unordered set of tables. Matches if any of these tables appear in the query.
+|no
+
+|--tablesExact
+|-e
+|string
+|Comma-delimited unordered set of tables. Matches if all of the tables (and no others) appear in the query.
+|no
+
+|===

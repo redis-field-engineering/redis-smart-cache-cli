@@ -5,11 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"smart-cache-cli/RedisCommon"
 	"sort"
 	"strings"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/spf13/cobra"
 )
@@ -90,7 +91,7 @@ var (
 )
 
 func init() {
-	listqCmd.Flags().StringVarP(&sortby, "sortby", "s", "queryTime", "The field in the"+
+	listqCmd.Flags().StringVarP(&sortby, "sortby", "b", "queryTime", "The field in the"+
 		" queries table to use to sort. Valid options include 'queryTime', 'accessFrequency', 'tables', and 'id")
 	listqCmd.Flags().StringVarP(&sortDirection, "sortDirection", "d", "DESC", "the direction to "+
 		"sort, valid options are 'DESC' and 'ASC'")
