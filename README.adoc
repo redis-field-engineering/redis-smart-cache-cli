@@ -1,0 +1,120 @@
+:linkattrs:
+:project-owner:   redis-field-engineering
+:project-name:    redis-smart-cache-cli
+:project-group:   com.redis
+:project-version: 0.0.2
+:project-url:     https://github.com/{project-owner}/{project-name}
+:product-name:    Redis Smart Cache CLI
+:property-prefix: smartcache
+:grafana-dir:     demo/redis-smart-cache-demo/grafana
+:imagesdir:       .github/images
+:toc:
+:toc-placement!:
+
+++++
+<p align="center">
+  <img alt="Redis Smart Cache" src="https://github.com/redis-field-engineering/redis-smart-cache/raw/master/src/media/Redis Smart Cache Github Banner Light.jpg">
+
+  <p align="center">
+    Redis Smart Cache is a JDBC query cache for <a href='https://redis.io/docs/stack/'>Redis Stack</a>, <a href='https://redis.com/redis-enterprise-cloud/overview/'>Redis Cloud</a>, and <a href='https://redis.com/redis-enterprise-software/overview/'>Redis Enterprise</a>.
+  </p>
+</p>
+++++
+
+'''
+
+== Redis Smart Cache CLI
+
+The Redis Smart Cache CLI is a tool for interacting with https://github.com/redis-field-engineering/redis-smart-cache[Redis Smart Cache]
+
+It was created to provide insight into the observations that smart cache is making, as well as to provide you control over
+what Smart Cache will cache. The CLI provides a 
+
+=== Installing
+
+Look at the https://github.com/redis-field-engineering/redis-smart-cache-cli/releases[Releases in GitHub], select the latest release and download the relevant binaries for your operating system.
+
+=== Usage
+
+There are two modes of use for the CLI
+
+1. Interactive - navigate the CLIs menus to observe the queries and tables being profiled by smart-cache, and use the interactive menu to apply updates to the rules used to guide Smart Cache's caching decisions
+2. Scripted - one off commands to perform a discrete task in the CLI
+
+==== Common Flags
+
+[cols="1,1,1,1,1"]
+|===
+|Flag Name|Shortcut|Type|Description|Default
+
+| --application
+| -s
+| string
+| The application namespace to use defaults to 'smartcache'
+|smartcache
+
+| --help
+|
+|
+| help for smart-cache-cli
+|
+
+| --host
+| -n
+| string
+| Host to connect to Redis on
+| localhost
+
+| --password
+| -a
+| string
+| The password for Redis
+
+| --port
+| -p
+| string
+| Port to connect to Redis on
+| 6379
+
+| --user
+| -u
+| string
+| User to authenticate to Redis with
+| default
+|===
+
+=== Interactive
+
+To run Redis Smart Cache CLI in interactive mode, simply run the cli `smart-cache-cli` with the whichever common flags are needed to connect to your Redis Instance. This will bring up a dialog with the following options:
+
+. List Queries
+. Rule List
+. Create Rule
+. Table List
+
+==== List Queries
+The List Queries table shows you the Queries that SmartCache is currently tracking:
+
+image:.github/images/query-list-table.png[Query List Table]
+
+this dialog lets you pick which queries you want to create rules for, simply hit space or enter to create a pending rule. This will pop up a rule dialog which will show you expanded details of the query, and allow you to enter a new TTL for the query.
+
+image:.github/images/query-rule-dialog.png[Query Rule Dialog]
+
+==== List Rules
+
+The List rule dialog will show you the rules currently in force for Smart Cache. You can batch the creation, editing, or deletion of rules.
+
+image:.github/images/rule-list.png[Rule List]
+
+==== Rule Creation
+
+The Rule creation dialog allows you to create whatever rule you want and move it to the top of the front of the rule priority list.
+
+image:.github/images/rule-creation.png[Rule Creation Dialog]
+
+==== Table List
+
+The Table list provides you a table level view of the profiling done by Smart Cache. It shows you your tables, their access frequency, the mean query time for all queries executed against them, and the current TTL of any rule that's set in Smart Cache to automatically cache queries against that table. 
+
+image:./.github/images/table-list.png[Table List]
