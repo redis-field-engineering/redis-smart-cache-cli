@@ -30,25 +30,27 @@ type RuleMsg struct {
 }
 
 type Model struct {
-	focusIndex   int
-	inputs       []textinput.Model
-	instructions []string
-	cursorMode   textinput.CursorMode
-	error        string
-	parentModel  tea.Model
-	rdb          *redis.Client
-	confirm      bool
-	isNew        bool
+	focusIndex      int
+	inputs          []textinput.Model
+	instructions    []string
+	cursorMode      textinput.CursorMode
+	error           string
+	parentModel     tea.Model
+	rdb             *redis.Client
+	confirm         bool
+	isNew           bool
+	applicationName string
 }
 
-func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool) Model {
+func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string) Model {
 	m := Model{
-		inputs:       make([]textinput.Model, 6),
-		instructions: make([]string, 6),
-		parentModel:  parentModel,
-		rdb:          rdb,
-		confirm:      confirm,
-		isNew:        rule == nil,
+		inputs:          make([]textinput.Model, 6),
+		instructions:    make([]string, 6),
+		parentModel:     parentModel,
+		rdb:             rdb,
+		confirm:         confirm,
+		isNew:           rule == nil,
+		applicationName: applicationName,
 	}
 
 	var t textinput.Model
@@ -153,7 +155,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ConfirmationDialog.ConfirmationMessage:
 		m.parentModel, _ = m.parentModel.Update(msg)
 		rule, _ := m.GetRuleFromModel()
-		_, err := RedisCommon.CommitNewRules(m.rdb, []RedisCommon.Rule{*rule})
+		_, err := RedisCommon.CommitNewRules(m.rdb, []RedisCommon.Rule{*rule}, m.applicationName)
 		if err != nil {
 			confMsg := ConfirmationDialog.ConfirmationMessage{
 				Message: "Failed to update Redis",
@@ -166,7 +168,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case tea.KeyCtrlC.String(), tea.KeyEsc.String():
 			return m, tea.Quit
-		case "q":
+		case tea.KeyCtrlB.String():
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		case tea.KeyTab.String(), tea.KeyShiftTab.String(), tea.KeyEnter.String(), tea.KeyUp.String(), tea.KeyDown.String():
@@ -242,6 +244,7 @@ func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 
 func (m Model) View() string {
 	var b strings.Builder
+	b.WriteString("Enter your Rule details, press ctrl+b to return to the previous screen\n")
 
 	for i := range m.inputs {
 		b.WriteString(fmt.Sprintf("%s%s", m.instructions[i], m.inputs[i].View()))

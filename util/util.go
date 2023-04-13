@@ -1,6 +1,10 @@
 package util
 
-import "strings"
+import (
+	"errors"
+	"regexp"
+	"strings"
+)
 
 func CenterString(str string, width int) string {
 	if len(str) > width {
@@ -29,4 +33,21 @@ func CompareSlices(slice []string, other []string) bool {
 	}
 
 	return true
+}
+
+func ValidateTimeout(input string) error {
+	pattern := "^\\s*(\\d+(?:\\.\\d+)?)\\s*([a-zA-Z]+)\\s*$"
+	matched, err := regexp.MatchString(pattern, input)
+	if err != nil {
+		return err
+	}
+
+	if !matched {
+
+		if !matched {
+			return errors.New("inputted duration did not match pattern")
+		}
+
+	}
+	return nil
 }

@@ -67,7 +67,7 @@ var makeruleCmd = &cobra.Command{
 		}
 
 		if confirmed {
-			_, err := RedisCommon.CommitNewRules(rdb, []RedisCommon.Rule{rule})
+			_, err := RedisCommon.CommitNewRules(rdb, []RedisCommon.Rule{rule}, ApplicationName)
 			if err != nil {
 				panic(err)
 			}

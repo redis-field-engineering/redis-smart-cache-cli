@@ -27,6 +27,7 @@ type Model struct {
 	indexesWithPendingUpdates []int
 	indexesWithPendingDeletes []int
 	indexesWithNewRules       []int
+	applicationName           string
 }
 
 var (
@@ -80,7 +81,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		case "n":
-			return RuleDialog.New(m, m.rdb, nil, false), nil
+			return RuleDialog.New(m, m.rdb, nil, false, m.applicationName), nil
 		case "r":
 			idxInDelete := indexOf(rowId, m.indexesWithPendingDeletes)
 			if idxInDelete >= 0 {
@@ -117,13 +118,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, idx := range m.indexesWithPendingDeletes {
 				rulesToDelete[idx+len(m.indexesWithNewRules)] = m.rules[idx]
 			}
-			confirmationDialog := BulkUpdateConfirmation.New(m, rulesToAdd, rulesToUpdate, rulesToDelete, m.rdb)
+			confirmationDialog := BulkUpdateConfirmation.New(m, rulesToAdd, rulesToUpdate, rulesToDelete, m.rdb, m.applicationName)
 			return confirmationDialog, nil
 
 		case tea.KeyTab.String(), tea.KeySpace.String(), tea.KeyEnter.String(), "e":
 			// pop open editor
 			rule := m.rules[rowId]
-			return RuleDialog.New(m, m.rdb, &rule, false), nil
+			return RuleDialog.New(m, m.rdb, &rule, false, m.applicationName), nil
 		}
 	case BulkUpdateConfirmation.BulkConfirmationMessage:
 		if msg.ConfirmedUpdate {
@@ -222,12 +223,12 @@ func (m Model) RefreshRows() table.Model {
 }
 
 func (m Model) FreshRulesFromRedis() Model {
-	m.rules, _ = RedisCommon.GetRules(m.rdb)
+	m.rules, _ = RedisCommon.GetRules(m.rdb, m.applicationName)
 	return m
 }
 
-func New(parentModel tea.Model, rdb *redis.Client) Model {
-	rules, _ := RedisCommon.GetRules(rdb)
+func New(parentModel tea.Model, rdb *redis.Client, applicationName string) Model {
+	rules, _ := RedisCommon.GetRules(rdb, applicationName)
 	rows := make([]table.Row, len(rules))
 	for i, r := range rules {
 		rows[i] = r.AsRow(i)
@@ -242,10 +243,11 @@ func New(parentModel tea.Model, rdb *redis.Client) Model {
 			WithPageSize(10).
 			SortByAsc("RowId").
 			WithTargetWidth(200),
-		rules:       rules,
-		parentModel: parentModel,
-		rdb:         rdb,
-		backupRules: make(map[uint64]*RedisCommon.Rule),
+		rules:           rules,
+		parentModel:     parentModel,
+		rdb:             rdb,
+		backupRules:     make(map[uint64]*RedisCommon.Rule),
+		applicationName: applicationName,
 	}
 
 	return model

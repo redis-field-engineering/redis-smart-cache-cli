@@ -16,15 +16,16 @@ import (
 const listHeight = 14
 
 type Model struct {
-	parentModel   tea.Model
-	table         table.Model
-	Queries       []*RedisCommon.Query
-	pendingRules  map[string]RedisCommon.Rule
-	Selection     int
-	rdb           *redis.Client
-	committed     bool
-	sortColumn    string
-	sortDirection SortDialog.Direction
+	parentModel     tea.Model
+	table           table.Model
+	Queries         []*RedisCommon.Query
+	pendingRules    map[string]RedisCommon.Rule
+	Selection       int
+	rdb             *redis.Client
+	committed       bool
+	sortColumn      string
+	sortDirection   SortDialog.Direction
+	applicationName string
 }
 
 var (
@@ -136,7 +137,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func ResetModel(m *Model) {
-	queries, err := RedisCommon.GetQueries(m.rdb)
+	queries, err := RedisCommon.GetQueries(m.rdb, m.applicationName)
 
 	if err != nil {
 		println(err)
@@ -157,7 +158,7 @@ func (m Model) CommitRuleUpdate() error {
 		rulesToCommit = append(rulesToCommit, rule)
 	}
 
-	_, err := RedisCommon.CommitNewRules(m.rdb, rulesToCommit)
+	_, err := RedisCommon.CommitNewRules(m.rdb, rulesToCommit, m.applicationName)
 	return err
 }
 
@@ -179,9 +180,9 @@ func (m Model) View() string {
 	return body.String()
 }
 
-func InitialModel(pm tea.Model, rdb *redis.Client) Model {
+func InitialModel(pm tea.Model, rdb *redis.Client, applicationName string) Model {
 
-	queries, err := RedisCommon.GetQueries(rdb)
+	queries, err := RedisCommon.GetQueries(rdb, applicationName)
 
 	if err != nil {
 		println(err)
@@ -199,10 +200,11 @@ func InitialModel(pm tea.Model, rdb *redis.Client) Model {
 			Border(customBorder).
 			WithPageSize(5).
 			SortByDesc("Mean Query Time").WithTargetWidth(200),
-		Queries:      queries,
-		parentModel:  pm,
-		pendingRules: make(map[string]RedisCommon.Rule),
-		rdb:          rdb,
+		Queries:         queries,
+		parentModel:     pm,
+		pendingRules:    make(map[string]RedisCommon.Rule),
+		rdb:             rdb,
+		applicationName: applicationName,
 	}
 	model.table = model.updateFooter()
 

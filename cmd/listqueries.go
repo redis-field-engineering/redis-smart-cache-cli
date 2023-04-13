@@ -42,7 +42,7 @@ var listqCmd = &cobra.Command{
 			DB:       0,
 		})
 
-		queries, err := RedisCommon.GetQueries(rdb)
+		queries, err := RedisCommon.GetQueries(rdb, ApplicationName)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
