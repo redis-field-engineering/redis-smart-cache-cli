@@ -104,10 +104,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	if m.Choice != "" {
-		return quitTextStyle.Render(fmt.Sprintf("Lets %s", m.Choice))
+		return ""
 	}
 	if m.quitting {
-		return quitTextStyle.Render("Goodbye")
+		return quitTextStyle.Render("Exiting. . .")
 	}
 	return "\n" + m.list.View() + "\n" + m.message
 }

@@ -24,3 +24,4 @@ go.work
 redis-smartcache-bubbletea
 rsccli
 smart-cache-cli
+dist/
