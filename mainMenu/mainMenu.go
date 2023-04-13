@@ -10,6 +10,7 @@ import (
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RuleDialog"
 	"smart-cache-cli/RuleList"
+	"smart-cache-cli/TableList"
 	"smart-cache-cli/queryList"
 )
 
@@ -88,6 +89,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName), nil
 				} else if string(i) == "Rule List" {
 					return RuleList.New(m, m.rdb, m.applicationName), nil
+				} else if string(i) == "Table List" {
+					return TableList.New(m, m.rdb, m.applicationName), nil
 				}
 			}
 			return m, tea.Quit
@@ -114,6 +117,7 @@ func InitialModel(rdb *redis.Client, applicationName string) Model {
 		item("List Queries"),
 		item("Rule List"),
 		item("Create Rule"),
+		item("Table List"),
 	}
 
 	const defaultWidth = 20

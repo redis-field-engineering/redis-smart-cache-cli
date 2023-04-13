@@ -39,6 +39,13 @@ const (
 	descending = "descending"
 )
 
+type Table struct {
+	Name            string
+	AccessFrequency uint64
+	QueryTime       float64
+	Rule            *Rule
+}
+
 type Query struct {
 	Id          string
 	Table       string
@@ -49,6 +56,72 @@ type Query struct {
 	Selected    bool
 	Rule        *Rule
 	PendingRule *Rule
+}
+
+func (t Table) GetTtl() string {
+	if t.Rule != nil {
+		return t.Rule.Ttl
+	}
+	return ""
+}
+
+func MatchTableAndRule(table Table, rules []Rule) *Rule {
+	for _, rule := range rules {
+		if rule.TablesAny != nil {
+			if contains(rule.TablesAny, table.Name) {
+				return &rule
+			}
+		}
+
+		if rule.TablesAll == nil && rule.Tables == nil && rule.TablesAny == nil && rule.Regex == nil && rule.QueryIds == nil {
+			return &rule
+		}
+
+		if rule.Tables != nil && contains(rule.Tables, table.Name) {
+			return &rule
+		}
+
+		if rule.TablesAll != nil && contains(rule.TablesAll, table.Name) {
+			return &rule
+		}
+	}
+	return nil
+}
+
+func GetTables(rdb *redis.Client, applicationName string) []Table {
+	res, err := rdb.Do(ctx, "FT.AGGREGATE", fmt.Sprintf("%s-query-idx", applicationName), "*", "APPLY", "split(@table, ',')", "AS", "name", "GROUPBY", "1", "@name", "REDUCE", "SUM", "1", "count", "as", "accessFrequency", "REDUCE", "AVG", "1", "mean", "AS", "avgQueryTime").Result()
+
+	if err != nil {
+		panic(err)
+	}
+
+	rules, err := GetRules(rdb, applicationName)
+
+	if err != nil {
+		panic(err)
+	}
+	outerArr := res.([]interface{})
+	tables := make([]Table, outerArr[0].(int64))
+	for i, item := range outerArr[1:] {
+		innerArr := item.([]interface{})
+		dict := ToMap(innerArr)
+		name, _ := dict["name"]
+		accessFrequencyStr, _ := dict["accessFrequency"]
+		accessFrequency, _ := strconv.ParseUint(accessFrequencyStr, 10, 64)
+		avgQueryTimeStr, _ := dict["avgQueryTime"]
+		avgQueryTime, _ := strconv.ParseFloat(avgQueryTimeStr, 64)
+		tables[i] = Table{
+			Name:            name,
+			AccessFrequency: accessFrequency,
+			QueryTime:       avgQueryTime,
+		}
+	}
+
+	for i, table := range tables {
+		tables[i].Rule = MatchTableAndRule(table, rules)
+	}
+
+	return tables
 }
 
 func GetPendingOrEmptyString(query *Query) string {
@@ -140,6 +213,27 @@ func GetColumnsOfQuery(sortColumn string, direction SortDialog.Direction) []tabl
 	return CreateColumns(sortColumn, direction, colNames, 20)
 }
 
+func GetColumnsOfTable(sortColumn string, direction SortDialog.Direction) []table.Column {
+	colNames := []string{
+		"Table Name",
+		"Query Time",
+		"Access Frequency",
+		"TTL",
+	}
+
+	return CreateColumns(sortColumn, direction, colNames, 20)
+}
+
+func (t *Table) GetAsRow(rowId int) table.Row {
+	return table.NewRow(table.RowData{
+		"Table Name":       t.Name,
+		"Query Time":       fmt.Sprintf("%.2f", t.QueryTime),
+		"Access Frequency": t.AccessFrequency,
+		"TTL":              t.GetTtl(),
+		"RowId":            rowId,
+	})
+}
+
 func (query *Query) GetAsRow(rowId int) table.Row {
 	return table.NewRow(table.RowData{
 		"Id":               query.Id,
@@ -152,6 +246,16 @@ func (query *Query) GetAsRow(rowId int) table.Row {
 		"Current ttl":      GetTtlOrEmptyString(query),
 		"RowId":            rowId,
 	})
+}
+
+func (t Table) Formatted() string {
+	return fmt.Sprintf(
+		`
+Table:
+Name: 	%s
+TTL: 	%s`,
+		t.Name,
+		t.GetTtl())
 }
 
 func (query *Query) Formatted() string {
@@ -223,6 +327,14 @@ type SearchResult struct {
 	count     int64
 	documents map[string]interface{}
 	indexType IndexType
+}
+
+func ToMap(res []interface{}) map[string]string {
+	m := make(map[string]string, len(res)/2)
+	for i := 0; i < len(res); i += 2 {
+		m[res[i].(string)] = res[i+1].(string)
+	}
+	return m
 }
 
 func ToLabelsMap(res []interface{}) map[string]string {

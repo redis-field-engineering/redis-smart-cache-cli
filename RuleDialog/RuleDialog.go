@@ -168,7 +168,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case tea.KeyCtrlC.String(), tea.KeyEsc.String():
 			return m, tea.Quit
-		case "q":
+		case tea.KeyCtrlB.String():
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		case tea.KeyTab.String(), tea.KeyShiftTab.String(), tea.KeyEnter.String(), tea.KeyUp.String(), tea.KeyDown.String():
@@ -244,6 +244,7 @@ func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 
 func (m Model) View() string {
 	var b strings.Builder
+	b.WriteString("Enter your Rule details, press ctrl+b to return to the previous screen\n")
 
 	for i := range m.inputs {
 		b.WriteString(fmt.Sprintf("%s%s", m.instructions[i], m.inputs[i].View()))
