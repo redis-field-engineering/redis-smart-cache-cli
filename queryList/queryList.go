@@ -168,6 +168,7 @@ func (m Model) View() string {
 
 	body.WriteString("Press left/right or page up/down to move pages\n")
 	body.WriteString("Press 'i' to toggle the header visibility\n")
+	body.WriteString("Press 's' to change sorting\n")
 	body.WriteString("Press space/enter to create a pending rule\n")
 	body.WriteString("Press 'c' to commit selected rules\n")
 	body.WriteString("Press 'q' or ctrl+c to quit\n")

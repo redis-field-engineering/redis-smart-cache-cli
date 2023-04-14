@@ -64,6 +64,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "b":
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
+		case "s":
+			return SortDialog.New([]string{"Access Frequency", "Query Time"}, m), nil
 
 		}
 	case RuleTtlView.TableTtlMsg:
@@ -74,6 +76,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		RedisCommon.CommitNewRules(m.rdb, []RedisCommon.Rule{rule}, m.applicationName)
 		ResetModel(&m)
 		return m, cmd
+	case SortDialog.SortMessage:
+		columns := RedisCommon.GetColumnsOfTable(msg.Choice, msg.Direction)
+		if msg.Direction == SortDialog.Descending {
+			m.table = m.table.WithColumns(columns).SortByDesc(msg.Choice)
+		} else {
+			m.table = m.table.WithColumns(columns).SortByAsc(msg.Choice)
+		}
 	}
 	m.table, cmd = m.table.Update(msg)
 	return m, cmd
@@ -83,6 +92,7 @@ func (m Model) View() string {
 	body := strings.Builder{}
 	body.WriteString("Press Enter to update the TTL for a table\n")
 	body.WriteString("Press 'b' to go back\n")
+	body.WriteString("Press 's' to change sorting.\n")
 	body.WriteString(m.table.View())
 
 	return body.String()
