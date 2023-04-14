@@ -273,6 +273,15 @@ Current ttl:		%s
 `, query.Id, GetPendingOrEmptyString(query), query.Key, query.Table, query.Sql, strconv.Itoa(query.Count), fmt.Sprintf("%.2fms", query.MeanTime), GetTtlOrEmptyString(query))
 }
 
+func (table *Table) GetRow(colWidth int) string {
+	row := "|"
+	row += util.CenterString(table.Name, colWidth) + "|"
+	row += util.CenterString(strconv.FormatUint(table.AccessFrequency, 10), colWidth) + "|"
+	row += util.CenterString(fmt.Sprintf("%.2f", table.QueryTime), colWidth) + "|"
+	row += util.CenterString(table.GetTtl(), colWidth) + "|"
+	return row
+}
+
 func (query *Query) GetRow(colWidth int) string {
 	row := "|"
 
@@ -284,6 +293,15 @@ func (query *Query) GetRow(colWidth int) string {
 	row += util.CenterString(strconv.Itoa(query.Count), colWidth) + "|"
 	row += util.CenterString(fmt.Sprintf("%.2fms", query.MeanTime), colWidth) + "|"
 	row += util.CenterString(GetTtlOrEmptyString(query), colWidth) + "|"
+	return row
+}
+
+func GetTablesTableHeader(colWidth int) string {
+	row := "|"
+	row += util.CenterString("Name", colWidth) + "|"
+	row += util.CenterString("Access Frequency", colWidth) + "|"
+	row += util.CenterString("Query Time", colWidth) + "|"
+	row += util.CenterString("TTL", colWidth) + "|"
 	return row
 }
 

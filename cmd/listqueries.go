@@ -85,11 +85,6 @@ var listqCmd = &cobra.Command{
 	},
 }
 
-var (
-	sortby        string
-	sortDirection string
-)
-
 func init() {
 	listqCmd.Flags().StringVarP(&sortby, "sortby", "b", "queryTime", "The field in the"+
 		" queries table to use to sort. Valid options include 'queryTime', 'accessFrequency', 'tables', and 'id")

@@ -53,6 +53,11 @@ var User string
 var Password string
 var ApplicationName string
 
+var (
+	sortby        string
+	sortDirection string
+)
+
 func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
