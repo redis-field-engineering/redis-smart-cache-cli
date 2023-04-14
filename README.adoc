@@ -185,7 +185,7 @@ The `makerule` command lets you create rules on the fly. This command is non-int
 |--tablesAll
 |-l
 |string
-|Comma-delimited unordered set of table names. Matches if **all** of the tables in the set appear in the query.
+|Comma-delimited unordered set of table names. Matches if **all** of these tables in the set appear in the query (other tables may appear, as well).
 |no
 
 |--tablesAny
@@ -197,7 +197,7 @@ The `makerule` command lets you create rules on the fly. This command is non-int
 |--tablesExact
 |-e
 |string
-|Comma-delimited unordered set of table names. Matches of all of the tables – and no others – appear in the query.
+|Comma-delimited unordered set of table names. Matches of all of these tables – and no others – appear in the query.
 |no
 
 |===
