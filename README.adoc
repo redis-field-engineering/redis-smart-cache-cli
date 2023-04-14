@@ -37,14 +37,8 @@ There are two ways to use the CLI:
 | --application
 | -s
 | string
-| The application namespace to use.
+| The application namespace to use
 | smartcache
-
-| --help
-|
-|
-| help for smart-cache-cli
-|
 
 | --host
 | -n
@@ -69,11 +63,17 @@ There are two ways to use the CLI:
 | string
 | Redis password
 
+| --help
+|
+|
+| help for smart-cache-cli
+|
+
 |===
 
 === Interactive
 
-To run Redis Smart Cache CLI in interactive mode, execute `smart-cache-cli` with the whichever  flags are needed to connect to your Redis instance. This will bring up a dialog with the following options:
+To run Redis Smart Cache CLI in interactive mode, execute `smart-cache-cli` with the flags needed to connect to your Redis instance. You'll then see a text-based dialog with the following options:
 
 . List Queries
 . Rule List
@@ -86,13 +86,14 @@ The List Queries table shows you the queries that Smart Cache is currently track
 
 image:query-list-table.png[Query List Table]
 
-This dialog lets you choose which queries you want to create rules for. Press _return_ to create a pending rule. This will open a rule dialog which will show you expanded details for the query. You can then provide a TTL, which will enable caching for this query.
+This dialog lets you choose which queries you want to create rules for. To create a pending rule for a given query, select the query you want and then press _return_.
+This will open a rule dialog which will show you expanded details for the query. You can then provide a TTL, which will enable caching for this query.
 
 image:query-rule-dialog.png[Query Rule Dialog]
 
 ==== List Rules
 
-The List Rules dialog displays the rules currently in force for Smart Cache. You can batch the creation, editing, or deletion of rules.
+The List Rules dialog displays the rules currently in force for Smart Cache. You can batch the creation, editing, and deletion of rules.
 
 image:rule-list.png[Rule List]
 
@@ -104,16 +105,18 @@ image:rule-creation.png[Rule Creation Dialog]
 
 ==== Table List
 
-The Table List view provides you a table level view of the profiling done by Smart Cache. You can see your tables, their access frequency, the mean query time for all queries executed against them. You can also see whether a query is cached, and the current TTL of any caching rule that's set in Smart Cache.
+The Table List view provides you a table-level view of the profiling done by Smart Cache.
+
+You can see your tables, their access frequency, and the mean query time for all queries executed against them. You can also see whether a query is cached, including the configured TTL for any cached queries.
 
 image:table-list.png[Table List]
 
 === Non-Interactive Commands
 
-The Smart Cache CLI provides several non-interactive commands. These include:
+The Smart Cache CLI provides several non-interactive (i.e., scriptable) commands. These include:
 
-1. Listing queries
-2. Creating rules
+1. List Queries
+2. Create Rules
 
 ==== List Queries
 
@@ -147,8 +150,7 @@ image:list-queries.png[List Queries]
 
 ==== Rule Creation
 
-The `makerule` command lets you create rules on the fly. This command is slightly interactive in that if you do not include the `y` flag, it will prompt you
-to confirm the rule's creation before enabling it.
+The `makerule` command lets you create rules on the fly. This command is non-interactive (i.e., scriptable) when you include the `y` flag (to confirm rule creation). See the flag descriptions below for details:
 
 ===== Rule Creation Flags
 
@@ -159,19 +161,19 @@ to confirm the rule's creation before enabling it.
 |--ttl
 |-t
 |string
-|The time to live as a duration (e.g. 5m, 300s, 2d) to enforce as the ttl for the rule.
+|The time to live as a duration (e.g. 5m, 300s, 2d) the rule. Essentially, this is how long the query will be cached for.
 |yes
 
 |--confirm
 |-y
 |
-| Provide this flag if you don't want the interactive dialog to confirm you want to commit the rule.
+| Provide this flag with a value of `-y` to run this command in non-interactive (i.e., scripted) mode.
 |no
 
 |--queryIds
 |-q
 |string
-|Comma-delimited unordered list of the ids of the queries that the rule will apply to.
+|Comma-delimited unordered list of the IDs of the queries that the rule will apply to.
 |no
 
 |--regex
@@ -183,19 +185,19 @@ to confirm the rule's creation before enabling it.
 |--tablesAll
 |-l
 |string
-|Comma-delimited unordered set of tables. Matches if all of the tables in the set appear in the query.
+|Comma-delimited unordered set of table names. Matches if **all** of the tables in the set appear in the query.
 |no
 
 |--tablesAny
 |-x
 |string
-|Comma-delimited unordered set of tables. Matches if any of these tables appear in the query.
+|Comma-delimited unordered set of table names. Matches if **any** of these tables appear in the query.
 |no
 
 |--tablesExact
 |-e
 |string
-|Comma-delimited unordered set of tables. Matches if all of the tables (and no others) appear in the query.
+|Comma-delimited unordered set of table names. Matches of all of the tables – and no others – appear in the query.
 |no
 
 |===
