@@ -499,17 +499,64 @@ func (r Rule) AsRow(rowId int) table.Row {
 }
 
 func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
-	res, err := rdb.Do(ctx, "JSON.GET", fmt.Sprintf("%s:config", applicationName), "$.rules[*]").Result()
+
+	res, err := rdb.XRevRangeN(ctx, fmt.Sprintf("%s:config", applicationName), "+", "-", 1).Result()
+
 	if err != nil {
 		return nil, err
 	}
 
-	theJson := res.(string)
+	if len(res) < 1 {
+		return make([]Rule, 0), nil
+	}
 
-	var rules []Rule
-	err = json.Unmarshal([]byte(theJson), &rules)
-	if err != nil {
-		return nil, err
+	ruleMap := make(map[int]Rule)
+
+	for key, _ := range res[0].Values {
+		value := res[0].Values[key]
+		split := strings.SplitN(key, ".", 3)
+		if len(split) < 3 {
+			fmt.Printf("Skipping invalid rule %s\n", res[0].Values[key])
+			continue
+		}
+
+		ruleNum, err := strconv.Atoi(split[1])
+		if err != nil {
+			fmt.Printf("skipping rule %s invalid rule number %s\n", key)
+			continue
+		}
+
+		rule, ruleInMap := ruleMap[ruleNum]
+		if !ruleInMap {
+			rule = Rule{}
+		}
+
+		ruleComponent := split[2]
+
+		switch ruleComponent {
+		case "tables":
+			rule.Tables = strings.Split(value.(string), ",")
+		case "tablesAny":
+			rule.TablesAny = strings.Split(value.(string), ",")
+		case "tablesAll":
+			rule.TablesAll = strings.Split(value.(string), ",")
+		case "queryIds":
+			rule.QueryIds = strings.Split(value.(string), ",")
+		case "Regex":
+			r := value.(string)
+			rule.Regex = &r
+		case "ttl":
+			rule.Ttl = value.(string)
+		}
+
+		ruleMap[ruleNum] = rule
+
+	}
+
+	rules := make([]Rule, len(ruleMap))
+
+	for i, rule := range ruleMap {
+		rules[i-1] = rule
 	}
 
 	return rules, nil
@@ -602,35 +649,101 @@ func (r Rule) Hash() uint64 {
 	return h.Sum64()
 }
 
-func CommitNewRules(rdb *redis.Client, rules []Rule, applicationName string) (string, error) {
-	args := []interface{}{"JSON.ARRINSERT", fmt.Sprintf("%s:config", applicationName), "$.rules", "0"}
+func (r Rule) NumArgs() int {
+	num := 1 // for ttl
+	if r.Regex != nil {
+		num++
+	}
+	if r.TablesAny != nil {
+		num++
+	}
+	if r.Tables != nil {
+		num++
+	}
+	if r.TablesAll != nil {
+		num++
+	}
+	if r.QueryIds != nil {
+		num++
+	}
+	return num
+}
 
-	for _, rule := range rules {
-		b, err := json.Marshal(rule)
-		if err != nil {
-			fmt.Println("Unable to serialize rule, rule commit failed, exiting. . .")
-		}
-		ruleStr := string(b)
-		args = append(args, ruleStr)
+func (r Rule) SerializeToStreamMsg(ruleNum int) []string {
+	ret := make([]string, r.NumArgs()*2)
+	ret[0] = fmt.Sprintf("rules.%d.ttl", ruleNum)
+	ret[1] = r.Ttl
+	i := 2
+	if r.Regex != nil {
+		ret[i] = fmt.Sprintf("rules.%d.regex", ruleNum)
+		ret[i+1] = *r.Regex
+		i += 2
+	}
+	if r.TablesAny != nil {
+		ret[i] = fmt.Sprintf("rules.%d.tablesAny", ruleNum)
+		ret[i+1] = strings.Join(r.TablesAny, ",")
+		i += 2
+	}
+	if r.Tables != nil {
+		ret[i] = fmt.Sprintf("rules.%d.tables", ruleNum)
+		ret[i+1] = strings.Join(r.Tables, ",")
+		i += 2
+	}
+	if r.TablesAll != nil {
+		ret[i] = fmt.Sprintf("rules.%d.tablesAll", ruleNum)
+		ret[i+1] = strings.Join(r.TablesAll, ",")
+		i += 2
+	}
+	if r.QueryIds != nil {
+		ret[i] = fmt.Sprintf("rules.%d.queryIds", ruleNum)
+		ret[i+1] = strings.Join(r.QueryIds, ",")
 	}
 
-	_, err := rdb.Do(ctx, args...).Result()
+	return ret
+}
+
+func CommitNewRules(rdb *redis.Client, rules []Rule, applicationName string) (string, error) {
+	currentRules, err := GetRules(rdb, applicationName)
+	if err != nil {
+		panic(err)
+	}
+
+	args := make([]string, 0)
+
+	for i, rule := range rules {
+		args = append(args, rule.SerializeToStreamMsg(i+1)...)
+	}
+
+	for i, rule := range currentRules {
+		args = append(args, rule.SerializeToStreamMsg(i+1+len(rules))...)
+	}
+
+	xAddArgs := redis.XAddArgs{Stream: fmt.Sprintf("%s:config", applicationName), Values: args}
+
+	id, err := rdb.XAdd(ctx, &xAddArgs).Result()
 	if err != nil {
 		return "", err
 	}
 
-	return "OK", nil
+	return id, nil
 }
 
-func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rule, rulesToDelete map[int]Rule, applicationName string) {
-	pipeline := rdb.Pipeline()
+func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rule, rulesToDelete map[int]Rule, applicationName string) error {
+	currentRules, err := GetRules(rdb, applicationName)
+
+	if err != nil {
+		panic(err)
+	}
+
+	rulesToCommit := make([]Rule, len(currentRules))
+	copy(rulesToCommit, currentRules)
+
 	for index, rule := range rulesToUpdate {
-		b, err := json.Marshal(rule)
-		if err != nil {
-			fmt.Printf("Unalbe to update rule: %s\n", err)
-			continue
+		if index >= len(currentRules) {
+			return fmt.Errorf("unable to update rules, rules out of sync")
 		}
-		pipeline.Do(ctx, "JSON.SET", fmt.Sprintf("%s:config", applicationName), fmt.Sprintf("$.rules[%d]", index), string(b))
+
+		rulesToCommit[index] = rule
 	}
 
 	indexesToPop := make([]int, len(rulesToDelete))
@@ -645,21 +758,24 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 	})
 
 	for _, i := range indexesToPop {
-		pipeline.Do(ctx, "JSON.ARRPOP", fmt.Sprintf("%s:config", applicationName), "$.rules", i)
+		rulesToCommit = append(rulesToCommit[:i], rulesToCommit[i+1:]...)
 	}
 
 	for _, rule := range rulesToAdd {
-		b, err := json.Marshal(rule)
-		if err != nil {
-			fmt.Printf("Unalbe to update rule: %s\n", err)
-			continue
-		}
-		pipeline.Do(ctx, "JSON.ARRINSERT", fmt.Sprintf("%s:config", applicationName), "$.rules", "0", string(b))
+		rulesToCommit = append([]Rule{rule}, rulesToCommit...)
 	}
 
-	_, err := pipeline.Exec(ctx)
+	args := make([]string, 0)
 
+	for i, rule := range rulesToCommit {
+		args = append(args, rule.SerializeToStreamMsg(i+1)...)
+	}
+
+	xAddArgs := redis.XAddArgs{Stream: fmt.Sprintf("%s:config", applicationName), Values: args}
+
+	_, err = rdb.XAdd(ctx, &xAddArgs).Result()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("encountered error: %s\n", err))
+		return err
 	}
+	return nil
 }
