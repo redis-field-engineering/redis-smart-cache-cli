@@ -19,7 +19,15 @@ This CLI lets you view your application's queries, analyze query performance, an
 
 == Installation
 
-To install the Redis Smart Cache CLI, select the https://github.com/redis-field-engineering/redis-smart-cache-cli/releases[latest release to download]. We provide builds for Linux, macOS, and Windows, across a variety of architectures.
+=== Homebrew
+
+You can install the Redis Smart Cache CLI by running:
+
+`brew install redis-field-engineering/tap/smart-cache-cli`
+
+=== Download the Binaries
+
+You can also download the Redis Smart Cache CLI binaries directly, select the https://github.com/redis-field-engineering/redis-smart-cache-cli/releases[latest release to download]. We provide builds for Linux, macOS, and Windows, across a variety of architectures.
 
 == Usage
 
