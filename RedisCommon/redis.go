@@ -248,6 +248,33 @@ func (query *Query) GetAsRow(rowId int) table.Row {
 	})
 }
 
+func (r Rule) Formatted() string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("Rule TTL:%s\n", r.Ttl))
+
+	if r.Tables != nil {
+		builder.WriteString(fmt.Sprintf("Tables: %s\n", strings.Join(r.Tables, ",")))
+	}
+
+	if r.TablesAll != nil {
+		builder.WriteString(fmt.Sprintf("Tables All: %s\n", strings.Join(r.TablesAll, ",")))
+	}
+
+	if r.TablesAny != nil {
+		builder.WriteString(fmt.Sprintf("Tables Any: %s\n", strings.Join(r.TablesAny, ",")))
+	}
+
+	if r.QueryIds != nil {
+		builder.WriteString(fmt.Sprintf("Query IDs: %s\n", strings.Join(r.QueryIds, ",")))
+	}
+
+	if r.Regex != nil {
+		builder.WriteString(fmt.Sprintf("Regex: %s\n", *r.Regex))
+	}
+
+	return builder.String()
+}
+
 func (t Table) Formatted() string {
 	return fmt.Sprintf(
 		`

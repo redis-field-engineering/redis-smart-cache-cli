@@ -56,9 +56,14 @@ func (m Model) View() string {
 	body := strings.Builder{}
 
 	body.WriteString("Would you like to commit the following Rules to Redis?\n")
+	body.WriteString("=============Rules To Commit==============\n")
 	for _, r := range m.pendingRules {
-		body.WriteString(r.GetJson() + "\n")
+		body.WriteString(r.Formatted())
+		body.WriteString("\n")
+
 	}
+
+	body.WriteString("===========================================\n")
 	body.WriteString("y/N")
 	return body.String()
 }

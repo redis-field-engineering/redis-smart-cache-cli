@@ -9,6 +9,10 @@ import (
 	"smart-cache-cli/mainMenu"
 )
 
+const (
+	version = "0.0.6"
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "redis-smartcache-cli",
@@ -16,6 +20,10 @@ var rootCmd = &cobra.Command{
 	Long: `A CLI for interacting with the Redis Smart Cache, use this to view the results of 
 smart cache profiling and ot create rules that smartcache will use to cache your queries.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if versionCheck {
+			fmt.Printf("Redis Smart Cache CLI Version: v%s\n", version)
+			os.Exit(0)
+		}
 		rdb := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", HostName, Port),
 			Password: Password,
@@ -44,7 +52,7 @@ var Port string
 var User string
 var Password string
 var ApplicationName string
-
+var versionCheck bool
 var (
 	sortby        string
 	sortDirection string
@@ -57,4 +65,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Password for Redis")
 	rootCmd.PersistentFlags().StringVarP(&Password, "user", "u", "default", "User to authenticate to Redis with - defaults to 'default'")
 	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "The application namespace to use defaults to 'smartcache'")
+	rootCmd.Flags().BoolVarP(&versionCheck, "version", "v", false, "Print version.")
 }
