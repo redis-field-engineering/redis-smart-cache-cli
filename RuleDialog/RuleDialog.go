@@ -166,9 +166,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.parentModel, nil
 	case tea.KeyMsg:
 		switch msg.String() {
-		case tea.KeyCtrlC.String(), tea.KeyEsc.String():
+		case tea.KeyCtrlC.String():
+			m.parentModel, _ = m.parentModel.Update(msg)
 			return m.parentModel, tea.Quit
-		case tea.KeyCtrlB.String():
+		case tea.KeyCtrlB.String(), tea.KeyEsc.String():
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		case tea.KeyTab.String(), tea.KeyShiftTab.String(), tea.KeyEnter.String(), tea.KeyUp.String(), tea.KeyDown.String():

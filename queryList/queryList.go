@@ -86,7 +86,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		s := msg.String()
 		switch s {
-		case tea.KeyCtrlC.String(), tea.KeyEsc.String(), "q":
+		case tea.KeyCtrlC.String(), "q":
 			return m.parentModel, tea.Quit
 		case tea.KeyTab.String(), tea.KeySpace.String(), tea.KeyEnter.String():
 			m.Selection = m.table.HighlightedRow().Data["RowId"].(int)
@@ -98,7 +98,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return ConfirmationDialog.New(m, m.pendingRules), cmd
 		case "s":
 			return SortDialog.New(RedisCommon.GetColumnNames(), m), nil
-		case "b":
+		case tea.KeyEsc.String(), "b":
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		}

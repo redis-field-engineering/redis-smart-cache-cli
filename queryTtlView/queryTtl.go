@@ -30,10 +30,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlB:
+		case tea.KeyCtrlB, tea.KeyEsc:
 			return *m.parentModel, cmd
-		case tea.KeyEsc, tea.KeyCtrlC:
-			return m, tea.Quit
+		case tea.KeyCtrlC:
+			*m.parentModel, _ = (*m.parentModel).Update(msg)
+			return *m.parentModel, tea.Quit
 		case tea.KeyEnter:
 			err := util.ValidateTimeout(m.textInput.Value())
 			if err != nil {
@@ -50,7 +51,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nPress ctrl+b to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(), m.textInput.View(), m.err)
+	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(), m.textInput.View(), m.err)
 }
 
 func New(query *RedisCommon.Query, pm tea.Model) Model {

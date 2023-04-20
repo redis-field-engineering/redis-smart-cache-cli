@@ -26,8 +26,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type.String() {
-		case tea.KeyCtrlB.String():
+		case tea.KeyCtrlB.String(), tea.KeyEsc.String():
 			return *m.parentModel, cmd
+		case tea.KeyCtrlC.String():
+			*m.parentModel, _ = (*m.parentModel).Update(msg)
+			return *m.parentModel, tea.Quit
 		case tea.KeyEnter.String():
 			err := util.ValidateTimeout(m.textInput.Value())
 			if err != nil {
@@ -49,7 +52,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nInput TTL in the form of a duration e.g. 1h, 300s, 5m or press 'ctrl + b' to return:\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
+	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
 }
 
 func New(table *RedisCommon.Table, parentModel tea.Model) Model {
