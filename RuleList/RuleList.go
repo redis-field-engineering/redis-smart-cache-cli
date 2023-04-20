@@ -75,7 +75,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		s := msg.String()
 		switch s {
-		case tea.KeyCtrlC.String(), "q":
+		case tea.KeyCtrlC.String(), "q", tea.KeyEsc.String():
 			return m.parentModel, tea.Quit
 		case "b":
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
