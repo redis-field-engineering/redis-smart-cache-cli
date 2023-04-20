@@ -83,13 +83,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
 				m.Choice = string(i)
-				if string(i) == "List Queries" {
+				if string(i) == listQueries {
 					return queryList.InitialModel(m, m.rdb, m.applicationName), nil
-				} else if string(i) == "Create Rule" {
+				} else if string(i) == createRule {
 					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName), nil
-				} else if string(i) == "Rule List" {
+				} else if string(i) == listRules {
 					return RuleList.New(m, m.rdb, m.applicationName), nil
-				} else if string(i) == "Table List" {
+				} else if string(i) == listTables {
 					return TableList.New(m, m.rdb, m.applicationName), nil
 				}
 			}
@@ -112,12 +112,19 @@ func (m Model) View() string {
 	return "\n" + m.list.View() + "\n" + m.message
 }
 
+const (
+	listQueries = "List application queries"
+	listTables  = "List tables"
+	listRules   = "List query caching rule"
+	createRule  = "Create query caching rule"
+)
+
 func InitialModel(rdb *redis.Client, applicationName string) Model {
 	items := []list.Item{
-		item("List Queries"),
-		item("Rule List"),
-		item("Create Rule"),
-		item("Table List"),
+		item(listQueries),
+		item(listTables),
+		item(listRules),
+		item(createRule),
 	}
 
 	const defaultWidth = 20
