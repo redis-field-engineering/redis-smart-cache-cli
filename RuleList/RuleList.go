@@ -70,7 +70,11 @@ func (m Model) DeleteRow(rowId int) Model {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.table, cmd = m.table.Update(msg)
-	rowId := m.table.HighlightedRow().Data["RowId"].(int)
+	rowId := -1
+	if len(m.rules) != 0 {
+		rowId = m.table.HighlightedRow().Data["RowId"].(int)
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		s := msg.String()
@@ -122,9 +126,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return confirmationDialog, nil
 
 		case tea.KeyTab.String(), tea.KeySpace.String(), tea.KeyEnter.String(), "e":
-			// pop open editor
-			rule := m.rules[rowId]
-			return RuleDialog.New(m, m.rdb, &rule, false, m.applicationName), nil
+			if rowId >= 0 {
+				// pop open editor
+				rule := m.rules[rowId]
+				return RuleDialog.New(m, m.rdb, &rule, false, m.applicationName), nil
+			}
 		}
 	case BulkUpdateConfirmation.BulkConfirmationMessage:
 		if msg.ConfirmedUpdate {
@@ -137,7 +143,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 	case RuleDialog.RuleMsg:
-		if m.rules[rowId].Equal(msg.Rule) {
+		if rowId >= 0 && m.rules[rowId].Equal(msg.Rule) {
 			return m, nil
 		}
 

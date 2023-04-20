@@ -207,7 +207,7 @@ func GetColumnsOfRule(sortColumn string, direction SortDialog.Direction) []table
 func GetColumnsOfQuery(sortColumn string, direction SortDialog.Direction) []table.Column {
 
 	colNames := []string{
-		"Id", "Pending Rule", "Key", "Table", "Sql", "Access Frequency", "Mean Query Time", "Current ttl",
+		"Id", "Pending Rule", "Key", "Table", "Sql", "Access Frequency", "Mean Query Time", "Caching Enabled", "Current ttl",
 	}
 
 	return CreateColumns(sortColumn, direction, colNames, 20)
@@ -235,6 +235,10 @@ func (t *Table) GetAsRow(rowId int) table.Row {
 }
 
 func (query *Query) GetAsRow(rowId int) table.Row {
+	cachingEnabled := "TRUE"
+	if GetTtlOrEmptyString(query) == "" {
+		cachingEnabled = "FALSE"
+	}
 	return table.NewRow(table.RowData{
 		"Id":               query.Id,
 		"Pending Rule":     GetPendingOrEmptyString(query),
@@ -245,6 +249,7 @@ func (query *Query) GetAsRow(rowId int) table.Row {
 		"Mean Query Time":  fmt.Sprintf("%.2fms", query.MeanTime),
 		"Current ttl":      GetTtlOrEmptyString(query),
 		"RowId":            rowId,
+		"Caching Enabled":  cachingEnabled,
 	})
 }
 
@@ -796,6 +801,11 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 
 	for i, rule := range rulesToCommit {
 		args = append(args, rule.SerializeToStreamMsg(i+1)...)
+	}
+
+	if len(args) == 0 {
+		args = append(args, "empty")
+		args = append(args, "true")
 	}
 
 	xAddArgs := redis.XAddArgs{Stream: fmt.Sprintf("%s:config", applicationName), Values: args}
