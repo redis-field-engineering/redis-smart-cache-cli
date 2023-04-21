@@ -63,7 +63,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&HostName, "host", "n", "localhost", "host to connect to Redis on")
 	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "the port to connect to Redis on")
 	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Password for Redis")
-	rootCmd.PersistentFlags().StringVarP(&Password, "user", "u", "default", "User to authenticate to Redis with - defaults to 'default'")
+	rootCmd.PersistentFlags().StringVarP(&User, "user", "u", "default", "User to authenticate to Redis with - defaults to 'default'")
 	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "The application namespace to use defaults to 'smartcache'")
 	rootCmd.Flags().BoolVarP(&versionCheck, "version", "v", false, "Print version.")
 }
