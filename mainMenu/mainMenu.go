@@ -26,6 +26,15 @@ type Model struct {
 	width           int
 }
 
+var banner = `
+   _____                      __     ______           __            ________    ____
+  / ___/____ ___  ____ ______/ /_   / ____/___ ______/ /_  ___     / ____/ /   /  _/
+  \__ \/ __ '__ \/ __ '/ ___/ __/  / /   / __ '/ ___/ __ \/ _ \   / /   / /    / /
+ ___/ / / / / / / /_/ / /  / /_   / /___/ /_/ / /__/ / / /  __/  / /___/ /____/ /
+/____/_/ /_/ /_/\__,_/_/   \__/   \____/\__,_/\___/_/ /_/\___/   \____/_____/___/
+
+`
+
 var (
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
@@ -111,7 +120,7 @@ func (m Model) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Exiting. . .")
 	}
-	return "\n" + m.list.View() + "\n" + m.message
+	return "\n" + banner + "\n" + m.list.View() + "\n" + m.message
 }
 
 const (
