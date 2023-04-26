@@ -75,7 +75,6 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.PersistentFlags().StringVarP(&HostName, "host", "n", "localhost", "host to connect to Redis on")
 	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "the port to connect to Redis on")
 	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Password for Redis")
