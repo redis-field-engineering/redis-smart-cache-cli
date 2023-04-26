@@ -6,6 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"os"
+	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/mainMenu"
 )
 
@@ -30,6 +31,21 @@ smart cache profiling and ot create rules that smartcache will use to cache your
 			Username: User,
 			DB:       0,
 		})
+
+		err := RedisCommon.Ping(rdb)
+
+		if err != nil {
+			fmt.Printf("Error encoutnered while connecting to Redis: \"%s\".\n", err.Error())
+			os.Exit(1)
+		}
+
+		err = RedisCommon.CheckSmartCacheIndex(rdb, ApplicationName)
+
+		if err != nil {
+			fmt.Printf("Encountered error while checking smart-cache configuration: %s\n", err)
+			os.Exit(1)
+		}
+
 		p := tea.NewProgram(mainMenu.InitialModel(rdb, ApplicationName))
 		if res, err := p.Run(); err != nil {
 			fmt.Printf("Alas, there's been an error: %v", err)

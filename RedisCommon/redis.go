@@ -804,8 +804,8 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 	}
 
 	if len(args) == 0 {
-		args = append(args, "empty")
-		args = append(args, "true")
+		args = append(args, "rule.1.ttl")
+		args = append(args, "0s")
 	}
 
 	xAddArgs := redis.XAddArgs{Stream: fmt.Sprintf("%s:config", applicationName), Values: args}
@@ -814,5 +814,32 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func Ping(rdb *redis.Client) error {
+	_, err := rdb.Ping(ctx).Result()
+	return err
+}
+
+func CheckSmartCacheIndex(rdb *redis.Client, applicationName string) error {
+	res, err := rdb.Do(ctx, "FT._LIST").Result()
+	if err != nil {
+		return err
+	}
+
+	arr := res.([]interface{})
+
+	strs := make([]string, len(arr))
+
+	for index, i := range arr {
+		strs[index] = i.(string)
+	}
+
+	if !contains(strs, fmt.Sprintf("%s-query-idx", applicationName)) {
+		return errors.New(fmt.Sprintf("smart cache does not appear to be configured to be configured for keyspace %s - "+
+			"please ensure that smart cache is confgigured and pointed at the configured instance of Redis", applicationName))
+	}
+
 	return nil
 }
