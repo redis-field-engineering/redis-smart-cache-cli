@@ -24,6 +24,7 @@ type Model struct {
 	rdb             *redis.Client
 	applicationName string
 	width           int
+	connectionInfo  string
 }
 
 var banner = `
@@ -120,7 +121,7 @@ func (m Model) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Exiting. . .")
 	}
-	return "\n" + banner + "\n" + m.list.View() + "\n" + m.message
+	return "\n" + banner + "\n" + fmt.Sprintf("Connected to: %s for application keyspace: %s\n\n", m.connectionInfo, m.applicationName) + m.list.View() + "\n" + m.message
 }
 
 const (
@@ -130,7 +131,7 @@ const (
 	createRule  = "Create query caching rule"
 )
 
-func InitialModel(rdb *redis.Client, applicationName string) Model {
+func InitialModel(rdb *redis.Client, applicationName string, connectionInfo string) Model {
 	items := []list.Item{
 		item(listQueries),
 		item(listTables),
@@ -147,5 +148,5 @@ func InitialModel(rdb *redis.Client, applicationName string) Model {
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
-	return Model{list: l, rdb: rdb, applicationName: applicationName}
+	return Model{list: l, rdb: rdb, applicationName: applicationName, connectionInfo: connectionInfo}
 }

@@ -46,7 +46,7 @@ smart cache profiling and ot create rules that smartcache will use to cache your
 			os.Exit(1)
 		}
 
-		p := tea.NewProgram(mainMenu.InitialModel(rdb, ApplicationName))
+		p := tea.NewProgram(mainMenu.InitialModel(rdb, ApplicationName, fmt.Sprintf("%s:%s", HostName, Port)))
 		if res, err := p.Run(); err != nil {
 			fmt.Printf("Alas, there's been an error: %v", err)
 			os.Exit(1)
