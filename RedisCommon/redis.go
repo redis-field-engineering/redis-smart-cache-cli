@@ -591,17 +591,17 @@ func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
 				rule.Tables = make([]string, 0)
 			}
 			rule.Tables = append(rule.Tables, value.(string))
-		case "tablesAny":
+		case "tables-any":
 			if rule.TablesAny == nil {
 				rule.TablesAny = make([]string, 0)
 			}
 			rule.TablesAny = append(rule.TablesAny, value.(string))
-		case "tablesAll":
+		case "tables-all":
 			if rule.TablesAll == nil {
 				rule.TablesAll = make([]string, 0)
 			}
 			rule.TablesAll = append(rule.TablesAll, value.(string))
-		case "queryIds":
+		case "query-ids":
 			if rule.QueryIds == nil {
 				rule.QueryIds = make([]string, 0)
 			}
@@ -752,16 +752,16 @@ func (r Rule) SerializeToStreamMsg(ruleNum int) []string {
 		ret = append(ret, *r.Regex)
 	}
 	if r.TablesAny != nil {
-		ret = append(ret, serializeToJacksonArr(r.TablesAny, "tablesAny", ruleNum)...)
+		ret = append(ret, serializeToJacksonArr(r.TablesAny, "tables-any", ruleNum)...)
 	}
 	if r.Tables != nil {
 		ret = append(ret, serializeToJacksonArr(r.Tables, "tables", ruleNum)...)
 	}
 	if r.TablesAll != nil {
-		ret = append(ret, serializeToJacksonArr(r.TablesAll, "tablesAll", ruleNum)...)
+		ret = append(ret, serializeToJacksonArr(r.TablesAll, "tables-all", ruleNum)...)
 	}
 	if r.QueryIds != nil {
-		ret = append(ret, serializeToJacksonArr(r.QueryIds, "queryIds", ruleNum)...)
+		ret = append(ret, serializeToJacksonArr(r.QueryIds, "query-ids", ruleNum)...)
 	}
 
 	return ret
