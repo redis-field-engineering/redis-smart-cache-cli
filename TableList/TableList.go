@@ -1,15 +1,16 @@
 package TableList
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
-	"github.com/redis/go-redis/v9"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/RuleTtlView"
 	"smart-cache-cli/SortDialog"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -90,9 +91,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	body := strings.Builder{}
-	body.WriteString("Press Enter to update the TTL for a table\n")
+	body.WriteString("Press [ENTER] to update the TTL for a table\n")
 	body.WriteString("Press 'b' to go back\n")
-	body.WriteString("Press 's' to change sorting.\n")
+	body.WriteString("Press 's' to change sorting\n")
 	body.WriteString(m.table.View())
 
 	return body.String()

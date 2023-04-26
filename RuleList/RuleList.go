@@ -1,10 +1,6 @@
 package RuleList
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
-	"github.com/redis/go-redis/v9"
 	"smart-cache-cli/BulkUpdateConfirmation"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RedisCommon"
@@ -12,6 +8,11 @@ import (
 	"smart-cache-cli/SortDialog"
 	"smart-cache-cli/util"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
+	"github.com/redis/go-redis/v9"
 )
 
 type Model struct {
@@ -187,11 +188,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	body := strings.Builder{}
 
-	body.WriteString("Press ctrl+c or q to quit\n")
-	body.WriteString("press b to go back\n")
-	body.WriteString("press tab or enter or space to edit a rule\n")
-	body.WriteString("press n to create a rule\n")
-	body.WriteString("press c to commit rule updates\n")
+	body.WriteString("Press [CTRL-C] or 'q' to quit\n")
+	body.WriteString("press 'b' to go back\n")
+	body.WriteString("press [TAB] or [ENTER] to edit a rule\n")
+	body.WriteString("press 'n' to create a rule\n")
+	body.WriteString("press 'c' to commit rule updates\n")
 	body.WriteString(m.table.View())
 
 	return body.String()

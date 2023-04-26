@@ -2,10 +2,11 @@ package SortDialog
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"io"
 )
 
 type Direction string
@@ -111,7 +112,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) toDirectionMode() list.Model {
 	const defaultWidth = 50
 	l := list.New([]list.Item{item(Descending), item(Ascending)}, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "Select Sort Direction"
+	l.Title = "Select sort direction"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle
@@ -131,7 +132,7 @@ func New(candidates []string, parentModel tea.Model) Model {
 	}
 	const defaultWidth = 50
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "Select Sort Field"
+	l.Title = "Select sort field"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle

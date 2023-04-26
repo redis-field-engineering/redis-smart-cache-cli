@@ -5,11 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"smart-cache-cli/RedisCommon"
 	"sort"
 	"strings"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/spf13/cobra"
 )
@@ -17,8 +18,8 @@ import (
 // listtablesCmd represents the listtables command
 var listtablesCmd = &cobra.Command{
 	Use:   "listtables",
-	Short: "List the tables that are profiled by smartcache.",
-	Long:  `List the tables that are profiled by smartcache.`,
+	Short: "List the tables being profiled by Redis Smart Cache.",
+	Long:  `List the tables being profiled by Redis Smart CAche.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rdb := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", HostName, Port),
@@ -33,7 +34,7 @@ var listtablesCmd = &cobra.Command{
 		sdLower := strings.ToLower(sortDirection)
 
 		if sdLower != string(desc) && sdLower != asc {
-			fmt.Println(fmt.Sprintf("%s was not a valid sort direction (valid directions are asc/desc)", sortDirection))
+			fmt.Println(fmt.Sprintf("%s is not a valid sort order. Valid orders are 'ASC' and 'DESC'.", sortDirection))
 			os.Exit(1)
 		}
 
@@ -67,7 +68,7 @@ func init() {
 	listtablesCmd.Flags().StringVarP(&sortby, "sortby", "b", "queryTime", "The field in the"+
 		" tables table to use to sort. Valid options include 'queryTime', 'accessFrequency'")
 	listtablesCmd.Flags().StringVarP(&sortDirection, "sortDirection", "d", "DESC", "the direction to "+
-		"sort, valid options are 'DESC' and 'ASC'")
+		"sort. Valid options are 'ASC' and 'DESC'.")
 
 	rootCmd.AddCommand(listtablesCmd)
 }

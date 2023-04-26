@@ -1,10 +1,11 @@
 package ConfirmationDialog
 
 import (
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
 	"smart-cache-cli/RedisCommon"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m Model) Init() tea.Cmd {
@@ -55,16 +56,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	body := strings.Builder{}
 
-	body.WriteString("Would you like to commit the following Rules to Redis?\n")
-	body.WriteString("=============Rules To Commit==============\n")
+	body.WriteString("Would you like to commit the following caching rules?\n")
+	body.WriteString("============= Rules to Commit ==============\n")
 	for _, r := range m.pendingRules {
 		body.WriteString(r.Formatted())
 		body.WriteString("\n")
 
 	}
 
-	body.WriteString("===========================================\n")
-	body.WriteString("y/N")
+	body.WriteString("============================================\n")
+	body.WriteString("(y)es / (N)o?")
 	return body.String()
 }
 

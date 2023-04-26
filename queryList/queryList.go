@@ -2,15 +2,16 @@ package queryList
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
-	"github.com/redis/go-redis/v9"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/SortDialog"
 	"smart-cache-cli/queryTtlView"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
+	"github.com/redis/go-redis/v9"
 )
 
 const listHeight = 14
@@ -59,7 +60,7 @@ func (m Model) updateFooter() table.Model {
 
 	successfullyCommittedText := ""
 	if m.committed {
-		successfullyCommittedText = "Successfuly Commited Rules to Redis!           "
+		successfullyCommittedText = "Successfuly commited caching rules!           "
 	}
 	footerText := fmt.Sprintf(
 		"%sPg. %d/%d - Pending Updates: %d",
@@ -171,17 +172,17 @@ func (m Model) View() string {
 	body := strings.Builder{}
 	m.table = m.updateFooter()
 
-	body.WriteString("Press left/right or page up/down to move pages\n")
+	body.WriteString("Press [←/→] or [PAGE UP/PAGE DOWN] to move pages\n")
 	body.WriteString("Press 'i' to toggle the header visibility\n")
 	body.WriteString("Press 's' to change sorting\n")
-	body.WriteString("Press space/enter to create a pending rule\n")
+	body.WriteString("Press [ENTER] to create a pending rule\n")
 	body.WriteString("Press 'c' to commit selected rules\n")
-	body.WriteString("Press 'q' or ctrl+c to quit\n")
 	body.WriteString("Press 'b' to go back\n")
+	body.WriteString("Press 'q' or [CTRL+C] to quit\n")
 
 	body.WriteString(m.table.View())
 
-	body.WriteString("\n")
+	body.WriteString("\n\n")
 
 	return body.String()
 }

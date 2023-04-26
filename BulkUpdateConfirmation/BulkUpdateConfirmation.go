@@ -2,11 +2,12 @@ package BulkUpdateConfirmation
 
 import (
 	"fmt"
+	"smart-cache-cli/RedisCommon"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/redis/go-redis/v9"
-	"smart-cache-cli/RedisCommon"
-	"strings"
 )
 
 func (m Model) Init() tea.Cmd {
@@ -69,7 +70,7 @@ func (m Model) View() string {
 		}
 	}
 
-	body.WriteString("y/N")
+	body.WriteString("Do you want to continue? (y/N)")
 	return body.String()
 }
 

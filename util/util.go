@@ -45,7 +45,7 @@ func ValidateTimeout(input string) error {
 	if !matched {
 
 		if !matched {
-			return errors.New("inputted duration did not match pattern")
+			return errors.New("Duration did not match pattern [Number][Duration] (e.g., 300s, 5m, 1h).")
 		}
 
 	}

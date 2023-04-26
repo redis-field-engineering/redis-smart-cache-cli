@@ -2,10 +2,11 @@ package queryTtlView
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/util"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m Model) Init() tea.Cmd {
@@ -56,7 +57,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 
-	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(m.width), m.textInput.View(), m.err)
+	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen.\nEnter TTL in the form of a duration (e.g. 1h, 300s, 5m):\n%s%s", m.query.Formatted(m.width), m.textInput.View(), m.err)
 }
 
 func New(query *RedisCommon.Query, pm tea.Model, width int) Model {

@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
-	"github.com/redis/go-redis/v9"
 	"hash/fnv"
 	"reflect"
 	"regexp"
@@ -16,6 +13,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
+	"github.com/redis/go-redis/v9"
 )
 
 var ctx = context.Background()
@@ -308,9 +309,9 @@ func splitAcrossLines(s string, width int) string {
 func (query *Query) Formatted(width int) string {
 	builder := strings.Builder{}
 
-	builder.WriteString("Query Details:\n")
+	builder.WriteString("=== Query Details ===\n\n")
 	builder.WriteString(fmt.Sprintf("Id:\t\t\t%s\n", query.Id))
-	builder.WriteString(fmt.Sprintf("Pending Rule:\t%s\n", GetPendingOrEmptyString(query)))
+	builder.WriteString(fmt.Sprintf("Pending rule:\t%s\n", GetPendingOrEmptyString(query)))
 	builder.WriteString(fmt.Sprintf("Key:\t\t\t%s\n", query.Key))
 	builder.WriteString(fmt.Sprintf("Table:\t\t\t%s\n", query.Table))
 	if len(query.Sql)+4 > width {
@@ -318,8 +319,8 @@ func (query *Query) Formatted(width int) string {
 	} else {
 		builder.WriteString(fmt.Sprintf("SQL:%s\n", query.Sql))
 	}
-	builder.WriteString(fmt.Sprintf("Access Frequency %s\n", strconv.Itoa(query.Count)))
-	builder.WriteString(fmt.Sprintf("Mean Query Time: %.2fms\n", query.MeanTime))
+	builder.WriteString(fmt.Sprintf("Access frequency %s\n", strconv.Itoa(query.Count)))
+	builder.WriteString(fmt.Sprintf("Mean query time: %.2fms\n", query.MeanTime))
 	builder.WriteString(fmt.Sprintf("Current TTL: %s\n", GetTtlOrEmptyString(query)))
 
 	return builder.String()
@@ -373,7 +374,7 @@ func GetHeader(colWidth int) string {
 func (r Rule) GetJson() string {
 	b, err := json.Marshal(r)
 	if err != nil {
-		fmt.Println("unable to serialize rule")
+		fmt.Println("Error: Unable to serialize rule.")
 		panic(r)
 	}
 
@@ -428,7 +429,7 @@ func GetQueries(rdb *redis.Client, applicationName string) ([]*Query, error) {
 
 	arr, ok := res.([]interface{})
 	if !ok {
-		return nil, errors.New("failed to parse result from Redis")
+		return nil, errors.New("Error: Failed to parse result from Redis")
 	}
 
 	queries := make(map[string]*Query)
@@ -568,13 +569,13 @@ func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
 		value := res[0].Values[key]
 		split := strings.Split(key, ".")
 		if len(split) < 3 {
-			fmt.Printf("Skipping invalid rule %s\n", res[0].Values[key])
+			fmt.Printf("Skipping invalid rule '%s'\n", res[0].Values[key])
 			continue
 		}
 
 		ruleNum, err := strconv.Atoi(split[1])
 		if err != nil {
-			fmt.Printf("skipping rule %s invalid rule number %s\n", key)
+			fmt.Printf("Skipping rule '%s'. Invalid rule number %s\n", key)
 			continue
 		}
 
@@ -805,7 +806,7 @@ func UpdateRules(rdb *redis.Client, rulesToAdd []Rule, rulesToUpdate map[int]Rul
 
 	for index, rule := range rulesToUpdate {
 		if index >= len(currentRules) {
-			return fmt.Errorf("unable to update rules, rules out of sync")
+			return fmt.Errorf("Unable to update rules: rules out of sync.")
 		}
 
 		rulesToCommit[index] = rule
@@ -870,8 +871,8 @@ func CheckSmartCacheIndex(rdb *redis.Client, applicationName string) error {
 	}
 
 	if !contains(strs, fmt.Sprintf("%s-query-idx", applicationName)) {
-		return errors.New(fmt.Sprintf("smart cache does not appear to be configured to be configured for keyspace %s - "+
-			"please ensure that smart cache is confgigured and pointed at the configured instance of Redis", applicationName))
+		return errors.New(fmt.Sprintf("Redis Smart Cache does not appear to be configured for application '%s'. "+
+			"Please ensure that Redis Smart Cache is running, configured with application '%s', and pointed at the correct Redis instance.", applicationName, applicationName))
 	}
 
 	return nil

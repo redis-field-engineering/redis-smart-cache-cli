@@ -5,11 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/redis/go-redis/v9"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RedisCommon"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/spf13/cobra"
 )
@@ -17,8 +18,8 @@ import (
 // makeruleCmd represents the makerule command
 var makeruleCmd = &cobra.Command{
 	Use:   "makerule",
-	Short: "Create a rule for Smart Cache",
-	Long:  `Creates a rule for Redis Smart Cache.`,
+	Short: "Create a Redis Smart Cache caching rule",
+	Long:  `Creates a Redis Smart Cache caching rule`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("makerule called")
 		rdb := redis.NewClient(&redis.Options{
@@ -71,7 +72,7 @@ var makeruleCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println("Successfully created rule in Redis.")
+			fmt.Println("Successfully created caching rule.")
 		}
 
 	},
