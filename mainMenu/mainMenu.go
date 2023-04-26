@@ -23,6 +23,7 @@ type Model struct {
 	quitting        bool
 	rdb             *redis.Client
 	applicationName string
+	width           int
 }
 
 var (
@@ -73,6 +74,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.message = msg.Message
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
+		m.width = msg.Width
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -84,7 +86,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.Choice = string(i)
 				if string(i) == listQueries {
-					return queryList.InitialModel(m, m.rdb, m.applicationName), nil
+					return queryList.InitialModel(m, m.rdb, m.applicationName, m.width), nil
 				} else if string(i) == createRule {
 					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName), nil
 				} else if string(i) == listRules {

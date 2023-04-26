@@ -26,6 +26,7 @@ type Model struct {
 	sortColumn      string
 	sortDirection   SortDialog.Direction
 	applicationName string
+	width           int
 }
 
 var (
@@ -83,6 +84,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.table = m.updateFooter()
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.table, _ = m.table.Update(msg)
+		return m, nil
 	case tea.KeyMsg:
 		s := msg.String()
 		switch s {
@@ -91,7 +96,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyTab.String(), tea.KeySpace.String(), tea.KeyEnter.String():
 			m.Selection = m.table.HighlightedRow().Data["RowId"].(int)
 			//m.EditMode = !m.EditMode
-			return queryTtlView.New(m.Queries[m.Selection], m), cmd
+			return queryTtlView.New(m.Queries[m.Selection], m, m.width), cmd
 		case "i":
 			m.table = m.table.WithHeaderVisibility(!m.table.GetHeaderVisibility())
 		case "c":
@@ -181,7 +186,7 @@ func (m Model) View() string {
 	return body.String()
 }
 
-func InitialModel(pm tea.Model, rdb *redis.Client, applicationName string) Model {
+func InitialModel(pm tea.Model, rdb *redis.Client, applicationName string, width int) Model {
 
 	queries, err := RedisCommon.GetQueries(rdb, applicationName)
 
@@ -206,6 +211,7 @@ func InitialModel(pm tea.Model, rdb *redis.Client, applicationName string) Model
 		pendingRules:    make(map[string]RedisCommon.Rule),
 		rdb:             rdb,
 		applicationName: applicationName,
+		width:           width,
 	}
 	model.table = model.updateFooter()
 

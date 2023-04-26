@@ -22,12 +22,16 @@ type Model struct {
 	pendingTtl  string
 	parentModel *tea.Model
 	err         string
+	width       int
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.textInput, _ = m.textInput.Update(msg)
+		m.width = msg.Width
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlB, tea.KeyEsc:
@@ -51,10 +55,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(), m.textInput.View(), m.err)
+
+	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.query.Formatted(m.width), m.textInput.View(), m.err)
 }
 
-func New(query *RedisCommon.Query, pm tea.Model) Model {
+func New(query *RedisCommon.Query, pm tea.Model, width int) Model {
 	ti := textinput.New()
 	ti.Placeholder = "30m"
 	ti.Focus()
@@ -66,5 +71,6 @@ func New(query *RedisCommon.Query, pm tea.Model) Model {
 		pendingTtl:  "",
 		parentModel: &pm,
 		query:       query,
+		width:       width,
 	}
 }

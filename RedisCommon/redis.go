@@ -290,19 +290,39 @@ TTL: 	%s`,
 		t.GetTtl())
 }
 
-func (query *Query) Formatted() string {
-	return fmt.Sprintf(
-		`
-Query Details:
-Id:			%s
-Pending Rule:	%s
-Key:			%s
-Table:			%s
-Sql:			%s
-Access Frequency:	%s
-Mean Query Time:	%s
-Current ttl:		%s
-`, query.Id, GetPendingOrEmptyString(query), query.Key, query.Table, query.Sql, strconv.Itoa(query.Count), fmt.Sprintf("%.2fms", query.MeanTime), GetTtlOrEmptyString(query))
+func splitAcrossLines(s string, width int) string {
+	var substrings []string
+
+	for i := 0; i < len(s); i += width {
+		endIndex := i + width
+		if endIndex > len(s) {
+			endIndex = len(s)
+		}
+
+		substrings = append(substrings, s[i:endIndex])
+	}
+
+	return strings.Join(substrings, "\n")
+}
+
+func (query *Query) Formatted(width int) string {
+	builder := strings.Builder{}
+
+	builder.WriteString("Query Details:\n")
+	builder.WriteString(fmt.Sprintf("Id:\t\t\t%s\n", query.Id))
+	builder.WriteString(fmt.Sprintf("Pending Rule:\t%s\n", GetPendingOrEmptyString(query)))
+	builder.WriteString(fmt.Sprintf("Key:\t\t\t%s\n", query.Key))
+	builder.WriteString(fmt.Sprintf("Table:\t\t\t%s\n", query.Table))
+	if len(query.Sql)+4 > width {
+		builder.WriteString(fmt.Sprintf("SQL:\n\n%s\n\n", splitAcrossLines(query.Sql, width)))
+	} else {
+		builder.WriteString(fmt.Sprintf("SQL:%s\n", query.Sql))
+	}
+	builder.WriteString(fmt.Sprintf("Access Frequency %s\n", strconv.Itoa(query.Count)))
+	builder.WriteString(fmt.Sprintf("Mean Query Time: %.2fms\n", query.MeanTime))
+	builder.WriteString(fmt.Sprintf("Current TTL: %s\n", GetTtlOrEmptyString(query)))
+
+	return builder.String()
 }
 
 func (table *Table) GetRow(colWidth int) string {
