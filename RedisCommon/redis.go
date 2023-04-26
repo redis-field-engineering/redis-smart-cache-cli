@@ -566,7 +566,7 @@ func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
 
 	for key, _ := range res[0].Values {
 		value := res[0].Values[key]
-		split := strings.SplitN(key, ".", 3)
+		split := strings.Split(key, ".")
 		if len(split) < 3 {
 			fmt.Printf("Skipping invalid rule %s\n", res[0].Values[key])
 			continue
@@ -587,13 +587,25 @@ func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
 
 		switch ruleComponent {
 		case "tables":
-			rule.Tables = strings.Split(value.(string), ",")
+			if rule.Tables == nil {
+				rule.Tables = make([]string, 0)
+			}
+			rule.Tables = append(rule.Tables, value.(string))
 		case "tablesAny":
-			rule.TablesAny = strings.Split(value.(string), ",")
+			if rule.TablesAny == nil {
+				rule.TablesAny = make([]string, 0)
+			}
+			rule.TablesAny = append(rule.TablesAny, value.(string))
 		case "tablesAll":
-			rule.TablesAll = strings.Split(value.(string), ",")
+			if rule.TablesAll == nil {
+				rule.TablesAll = make([]string, 0)
+			}
+			rule.TablesAll = append(rule.TablesAll, value.(string))
 		case "queryIds":
-			rule.QueryIds = strings.Split(value.(string), ",")
+			if rule.QueryIds == nil {
+				rule.QueryIds = make([]string, 0)
+			}
+			rule.QueryIds = append(rule.QueryIds, value.(string))
 		case "Regex":
 			r := value.(string)
 			rule.Regex = &r
@@ -721,34 +733,35 @@ func (r Rule) NumArgs() int {
 	return num
 }
 
+func serializeToJacksonArr(arr []string, component string, ruleNum int) []string {
+	var res []string
+	for i, item := range arr {
+		res = append(res, fmt.Sprintf("rules.%d.%s.%d", ruleNum, component, i+1))
+		res = append(res, item)
+	}
+
+	return res
+}
+
 func (r Rule) SerializeToStreamMsg(ruleNum int) []string {
-	ret := make([]string, r.NumArgs()*2)
-	ret[0] = fmt.Sprintf("rules.%d.ttl", ruleNum)
-	ret[1] = r.Ttl
-	i := 2
+	var ret []string
+	ret = append(ret, fmt.Sprintf("rules.%d.ttl", ruleNum))
+	ret = append(ret, r.Ttl)
 	if r.Regex != nil {
-		ret[i] = fmt.Sprintf("rules.%d.regex", ruleNum)
-		ret[i+1] = *r.Regex
-		i += 2
+		ret = append(ret, fmt.Sprintf("rules.%d.regex", ruleNum))
+		ret = append(ret, *r.Regex)
 	}
 	if r.TablesAny != nil {
-		ret[i] = fmt.Sprintf("rules.%d.tablesAny", ruleNum)
-		ret[i+1] = strings.Join(r.TablesAny, ",")
-		i += 2
+		ret = append(ret, serializeToJacksonArr(r.TablesAny, "tablesAny", ruleNum)...)
 	}
 	if r.Tables != nil {
-		ret[i] = fmt.Sprintf("rules.%d.tables", ruleNum)
-		ret[i+1] = strings.Join(r.Tables, ",")
-		i += 2
+		ret = append(ret, serializeToJacksonArr(r.Tables, "tables", ruleNum)...)
 	}
 	if r.TablesAll != nil {
-		ret[i] = fmt.Sprintf("rules.%d.tablesAll", ruleNum)
-		ret[i+1] = strings.Join(r.TablesAll, ",")
-		i += 2
+		ret = append(ret, serializeToJacksonArr(r.TablesAll, "tablesAll", ruleNum)...)
 	}
 	if r.QueryIds != nil {
-		ret[i] = fmt.Sprintf("rules.%d.queryIds", ruleNum)
-		ret[i+1] = strings.Join(r.QueryIds, ",")
+		ret = append(ret, serializeToJacksonArr(r.QueryIds, "queryIds", ruleNum)...)
 	}
 
 	return ret
