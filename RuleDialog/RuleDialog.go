@@ -73,11 +73,11 @@ type Model struct {
 	ttl              string
 	match            string
 	textInput        textinput.Model
+	wasPreset        bool
 }
 
-func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string) Model {
+func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string, ruleType RedisCommon.RuleType) Model {
 	items := []list.Item{
-		item{RedisCommon.QueryIds},
 		item{RedisCommon.Tables},
 		item{RedisCommon.TablesAll},
 		item{RedisCommon.TablesAny},
@@ -92,6 +92,7 @@ func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confi
 	ti.Focus()
 	ti.CharLimit = 30
 	ti.Width = 30
+	wasPreset := ruleType != RedisCommon.Unknown
 
 	m := Model{
 		parentModel:      parentModel,
@@ -100,9 +101,10 @@ func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confi
 		isNew:            rule == nil,
 		applicationName:  applicationName,
 		typeSelectorList: typeSelectList,
-		ruleType:         RedisCommon.Unknown,
+		ruleType:         ruleType,
 		textInput:        ti,
 		ttl:              "",
+		wasPreset:        wasPreset,
 	}
 
 	return m
@@ -165,7 +167,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.match != "" {
 				m.match = ""
 				return m, nil
-			} else if m.ruleType != RedisCommon.Unknown {
+			} else if m.ruleType != RedisCommon.Unknown && !m.wasPreset {
 				m.ruleType = RedisCommon.Unknown
 				return m, nil
 			}
@@ -245,7 +247,13 @@ func (m Model) View() string {
 		return b.String()
 	} else if m.match == "" && m.ruleType != RedisCommon.All {
 		b.WriteString(m.ruleSoFar())
-		b.WriteString("Input what you want to match against: ")
+		if m.ruleType == RedisCommon.Regex {
+			b.WriteString("Input a regular expression to match against:")
+		} else if m.ruleType == RedisCommon.QueryIds {
+			b.WriteString("Input a comma delimited list of Query Ids to match against:")
+		} else {
+			b.WriteString("Input a comma delimited list of tables to match against:")
+		}
 		b.WriteString(m.textInput.View())
 	} else {
 		b.WriteString(m.ruleSoFar())

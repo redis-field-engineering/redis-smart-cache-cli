@@ -86,7 +86,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.parentModel, _ = m.parentModel.Update(ConfirmationDialog.ConfirmationMessage{ConfirmedUpdate: true})
 			return m.parentModel, nil
 		case "n":
-			return RuleDialog.New(m, m.rdb, nil, false, m.applicationName), nil
+			return RuleDialog.New(m, m.rdb, nil, false, m.applicationName, RedisCommon.Unknown), nil
 		case "r":
 			idxInDelete := indexOf(rowId, m.indexesWithPendingDeletes)
 			if idxInDelete >= 0 {
@@ -130,7 +130,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if rowId >= 0 {
 				// pop open editor
 				rule := m.rules[rowId]
-				return RuleDialog.New(m, m.rdb, &rule, false, m.applicationName), nil
+				return RuleDialog.New(m, m.rdb, &rule, false, m.applicationName, rule.GetType()), nil
 			}
 		}
 	case BulkUpdateConfirmation.BulkConfirmationMessage:
@@ -192,6 +192,7 @@ func (m Model) View() string {
 	body.WriteString("press 'b' to go back\n")
 	body.WriteString("press [ENTER] to edit a rule\n")
 	body.WriteString("press 'n' to create a rule\n")
+	body.WriteString("press 'd' to delete a rule\n")
 	body.WriteString("press 'c' to commit rule updates\n")
 	body.WriteString(m.table.View())
 
