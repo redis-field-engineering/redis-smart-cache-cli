@@ -50,21 +50,21 @@ func (m Model) View() string {
 	body := strings.Builder{}
 
 	if len(m.rulesToAdd) > 0 {
-		body.WriteString("======Rules To Add======\n")
+		body.WriteString("====== Rules to Add ======\n")
 		for _, r := range m.rulesToAdd {
 			body.WriteString(r.Formatted() + "\n")
 		}
 	}
 
 	if len(m.rulesToUpdate) > 0 {
-		body.WriteString("\n\n======Rules To Update======b\n")
+		body.WriteString("\n\n====== Rules To Update ======\n")
 		for _, r := range m.rulesToUpdate {
 			body.WriteString(fmt.Sprintf("%s\n", r.Formatted()))
 		}
 	}
 
 	if len(m.rulesToDelete) > 0 {
-		body.WriteString("\n\n======Rules To Delete======\n")
+		body.WriteString("\n\n====== Rules to Delete ======\n")
 		for _, r := range m.rulesToDelete {
 			body.WriteString(fmt.Sprintf("%s\n", r.Formatted()))
 		}
