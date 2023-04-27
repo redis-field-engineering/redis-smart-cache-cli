@@ -188,9 +188,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	body := strings.Builder{}
 
-	body.WriteString("Press [CTRL-C] or 'q' to quit\n")
+	body.WriteString("Press [CTRL-C] to quit\n")
 	body.WriteString("press 'b' to go back\n")
-	body.WriteString("press [TAB] or [ENTER] to edit a rule\n")
+	body.WriteString("press [ENTER] to edit a rule\n")
 	body.WriteString("press 'n' to create a rule\n")
 	body.WriteString("press 'c' to commit rule updates\n")
 	body.WriteString(m.table.View())

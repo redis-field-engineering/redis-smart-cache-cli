@@ -172,13 +172,13 @@ func (m Model) View() string {
 	body := strings.Builder{}
 	m.table = m.updateFooter()
 
-	body.WriteString("Press [←/→] or [PAGE UP/PAGE DOWN] to move pages\n")
+	body.WriteString("Press [←/→] to move pages\n")
 	body.WriteString("Press 'i' to toggle the header visibility\n")
 	body.WriteString("Press 's' to change sorting\n")
 	body.WriteString("Press [ENTER] to create a pending rule\n")
 	body.WriteString("Press 'c' to commit selected rules\n")
 	body.WriteString("Press 'b' to go back\n")
-	body.WriteString("Press 'q' or [CTRL+C] to quit\n")
+	body.WriteString("Press [CTRL+C] to quit\n")
 
 	body.WriteString(m.table.View())
 

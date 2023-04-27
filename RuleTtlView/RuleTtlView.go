@@ -53,7 +53,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nPress [CTRL+B] or [ESC] to return to the previous screen.\nEnter TTL in the form of a duration (e.g. 300s, 5m, 1h):\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
+	return fmt.Sprintf("%s\n\nPress [ESC] to return to the previous screen.\nEnter TTL in the form of a duration (e.g. 300s, 5m, 1h):\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
 }
 
 func New(table *RedisCommon.Table, parentModel tea.Model) Model {
