@@ -1,11 +1,11 @@
 package ConfirmationDialog
 
 import (
-	"smart-cache-cli/RedisCommon"
-	"strings"
-
+	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"smart-cache-cli/RedisCommon"
+	"strings"
 )
 
 func (m Model) Init() tea.Cmd {
@@ -24,8 +24,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		s := msg.String()
 		switch s {
-		case tea.KeyEsc.String(), tea.KeyCtrlC.String(), "q":
-			return m, tea.Quit
+		case tea.KeyEsc.String(), "b":
+			m.parentModel, _ = m.parentModel.Update(msg)
+			return m.parentModel, nil
+		case tea.KeyCtrlC.String(), "q":
+			m.parentModel, _ = m.parentModel.Update(msg)
+			return m.parentModel, tea.Quit
 		case "y", "Y":
 			if m.parentModel == nil {
 				m.Confirmed = true
@@ -55,8 +59,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	body := strings.Builder{}
+	noun := "rule"
+	if len(m.pendingRules) > 1 {
+		noun = "rules"
+	}
 
-	body.WriteString("Would you like to commit the following caching rules?\n")
+	body.WriteString(fmt.Sprintf("Would you like to commit the following caching %s?\n", noun))
 	body.WriteString("============= Rules to Commit ==============\n")
 	for _, r := range m.pendingRules {
 		body.WriteString(r.Formatted())
