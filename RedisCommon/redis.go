@@ -574,7 +574,7 @@ func (r Rule) AsRow(rowId int) table.Row {
 	}
 
 	if r.Regex != nil {
-		rd["Matches"] = r.Regex
+		rd["Matches"] = *r.Regex
 	}
 
 	rd["RowId"] = rowId
@@ -638,7 +638,7 @@ func GetRules(rdb *redis.Client, applicationName string) ([]Rule, error) {
 				rule.QueryIds = make([]string, 0)
 			}
 			rule.QueryIds = append(rule.QueryIds, value.(string))
-		case "Regex":
+		case "regex":
 			r := value.(string)
 			rule.Regex = &r
 		case "ttl":
