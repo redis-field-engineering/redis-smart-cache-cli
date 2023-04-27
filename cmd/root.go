@@ -79,7 +79,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&HostName, "host", "n", "localhost", "Redis host")
 	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "Redis port")
 	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Redis password")
-	rootCmd.PersistentFlags().StringVarP(&User, "user", "u", "default", "Redis user. Defaults to 'default'")
-	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "Application namespace. Defaults to 'smartcache'")
+	rootCmd.PersistentFlags().StringVarP(&User, "user", "u", "default", "Redis user")
+	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "Application namespace")
 	rootCmd.Flags().BoolVarP(&versionCheck, "version", "v", false, "Smart Cache CLI version")
 }

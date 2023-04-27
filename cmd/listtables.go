@@ -18,8 +18,8 @@ import (
 // listtablesCmd represents the listtables command
 var listtablesCmd = &cobra.Command{
 	Use:   "listtables",
-	Short: "List the tables being profiled by Redis Smart Cache.",
-	Long:  `List the tables being profiled by Redis Smart CAche.`,
+	Short: "List the tables being profiled by Redis Smart Cache",
+	Long:  `List the tables being profiled by Redis Smart Cache`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rdb := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", HostName, Port),

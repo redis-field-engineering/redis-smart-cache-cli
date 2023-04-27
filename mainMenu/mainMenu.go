@@ -144,7 +144,7 @@ func InitialModel(rdb *redis.Client, applicationName string, connectionInfo stri
 	const defaultWidth = 20
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "-- Main menu --"
+	l.Title = "== Main menu =="
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle

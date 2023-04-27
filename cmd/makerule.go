@@ -18,8 +18,8 @@ import (
 // makeruleCmd represents the makerule command
 var makeruleCmd = &cobra.Command{
 	Use:   "makerule",
-	Short: "Create a Redis Smart Cache caching rule",
-	Long:  `Creates a Redis Smart Cache caching rule`,
+	Short: "Create a caching rule",
+	Long:  `Creates a caching rule`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("makerule called")
 		rdb := redis.NewClient(&redis.Options{

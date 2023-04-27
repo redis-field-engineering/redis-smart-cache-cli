@@ -2,16 +2,17 @@ package RuleDialog
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/redis/go-redis/v9"
 	"io"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/util"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/redis/go-redis/v9"
 )
 
 type item struct{ ruleType RedisCommon.RuleType }
@@ -242,22 +243,22 @@ func (m Model) View() string {
 	var b strings.Builder
 
 	if m.ruleType == RedisCommon.Unknown {
-		b.WriteString("select a rule type, press ctrl+b to return to the previous screen\n")
+		b.WriteString("  == Create rule menu ==\n\n  Select the type of rule you want to create.\n  Press [CTRL+B] to return to the previous screen.\n\n")
 		b.WriteString(m.typeSelectorList.View())
 		return b.String()
 	} else if m.match == "" && m.ruleType != RedisCommon.All {
 		b.WriteString(m.ruleSoFar())
 		if m.ruleType == RedisCommon.Regex {
-			b.WriteString("Input a regular expression to match against:")
+			b.WriteString("Enter a regular expression to match against:")
 		} else if m.ruleType == RedisCommon.QueryIds {
-			b.WriteString("Input a comma delimited list of Query Ids to match against:")
+			b.WriteString("Enter a comma-separated list of Query IDs to match against:")
 		} else {
-			b.WriteString("Input a comma delimited list of tables to match against:")
+			b.WriteString("Enter a comma-separated list of tables to match against:")
 		}
 		b.WriteString(m.textInput.View())
 	} else {
 		b.WriteString(m.ruleSoFar())
-		b.WriteString("Input TTL in the form of a duration e.g. 1h, 300s, 5m: ")
+		b.WriteString("Enter a TTL in the form of a duration (e.g. 1h, 300s, 5m):")
 		b.WriteString(m.textInput.View())
 	}
 

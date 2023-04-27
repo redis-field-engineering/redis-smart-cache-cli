@@ -33,7 +33,7 @@ const (
 // listqCmd represents the listq command
 var listqCmd = &cobra.Command{
 	Use:   "listqueries",
-	Short: "List queries seen by Redis Smart Cache",
+	Short: "List the queries seen by Redis Smart Cache",
 	Long:  `List queries seen by `,
 	Run: func(cmd *cobra.Command, args []string) {
 		rdb := redis.NewClient(&redis.Options{
