@@ -23,6 +23,17 @@ var ctx = context.Background()
 type IndexType int
 type SortField string
 type Direction string
+type RuleType string
+
+const (
+	All       RuleType = "All"
+	Regex     RuleType = "Regex"
+	Tables    RuleType = "Tables Exact"
+	TablesAny RuleType = "Tables Any"
+	TablesAll RuleType = "Tables All"
+	QueryIds  RuleType = "Query IDs"
+	Unknown   RuleType = "Unknown"
+)
 
 const (
 	hashIdx IndexType = iota
@@ -188,7 +199,7 @@ func CreateColumns(sortColumn string, direction SortDialog.Direction, colNames [
 func GetColumnsOfRule(sortColumn string, direction SortDialog.Direction) []table.Column {
 	colWidth := 30
 	colNames := []string{
-		"TTL", "Tables", "Tables All", "Tables Any", "Query Ids", "Regex",
+		"TTL", "Rule Type", "Matches",
 	}
 
 	cols := CreateColumns(sortColumn, direction, colNames, colWidth)
@@ -255,7 +266,7 @@ func (query *Query) GetAsRow(rowId int) table.Row {
 
 func (r Rule) Formatted() string {
 	builder := strings.Builder{}
-	builder.WriteString(fmt.Sprintf("Rule TTL:%s\n", r.Ttl))
+	builder.WriteString(fmt.Sprintf("Rule Type:%s\nRule TTL:%s\n", r.GetType(), r.Ttl))
 
 	if r.Tables != nil {
 		builder.WriteString(fmt.Sprintf("Tables: %s\n", strings.Join(r.Tables, ",")))
@@ -393,6 +404,10 @@ type Rule struct {
 	Ttl       string   `json:"ttl"`
 }
 
+func (r Rule) Type() {
+
+}
+
 type SearchResult struct {
 	count     int64
 	documents map[string]interface{}
@@ -511,38 +526,54 @@ func contains(s []string, str string) bool {
 	return false
 }
 
+func (r Rule) GetType() RuleType {
+	if r.Tables != nil {
+		return Tables
+	}
+
+	if r.TablesAny != nil {
+		return TablesAny
+	}
+
+	if r.TablesAll != nil {
+		return TablesAll
+	}
+
+	if r.QueryIds != nil {
+		return QueryIds
+	}
+
+	if r.Regex != nil {
+		return Regex
+	}
+
+	return All
+}
+
 func (r Rule) AsRow(rowId int) table.Row {
 
 	rd := table.RowData{}
 	rd["TTL"] = r.Ttl
+	rd["Matches"] = "any"
+	rd["Rule Type"] = r.GetType()
 	if r.Tables != nil {
-		rd["Tables"] = strings.Join(r.Tables, ",")
-	} else {
-		rd["Tables"] = ""
+		rd["Matches"] = strings.Join(r.Tables, ",")
 	}
 
 	if r.TablesAny != nil {
-		rd["Tables Any"] = strings.Join(r.TablesAny, ",")
-	} else {
-		rd["Tables Any"] = ""
+		rd["Matches"] = strings.Join(r.TablesAny, ",")
 	}
 
 	if r.TablesAll != nil {
-		rd["Tables All"] = strings.Join(r.TablesAll, ",")
-	} else {
-		rd["Tables All"] = ""
+		rd["Matches"] = strings.Join(r.TablesAll, ",")
 	}
 
 	if r.QueryIds != nil {
-		rd["Query Ids"] = strings.Join(r.QueryIds, ",")
-	} else {
-		rd["Query Ids"] = ""
+		rd["Matches"] = strings.Join(r.QueryIds, ",")
 	}
 
 	if r.Regex != nil {
-		rd["Regex"] = r.Regex
-	} else {
-		rd["Regex"] = ""
+		rd["Matches"] = r.Regex
 	}
 
 	rd["RowId"] = rowId
