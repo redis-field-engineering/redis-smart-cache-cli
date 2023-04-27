@@ -33,8 +33,8 @@ const (
 // listqCmd represents the listq command
 var listqCmd = &cobra.Command{
 	Use:   "listqueries",
-	Short: "List Queries being tracked by smart cache",
-	Long:  `Lists the queries being tracked by `,
+	Short: "List queries seen by Redis Smart Cache",
+	Long:  `List queries seen by `,
 	Run: func(cmd *cobra.Command, args []string) {
 		rdb := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", HostName, Port),
@@ -53,7 +53,7 @@ var listqCmd = &cobra.Command{
 		sdLower := strings.ToLower(sortDirection)
 
 		if sdLower != string(desc) && sdLower != asc {
-			fmt.Println(fmt.Sprintf("%s was not a valid sort direction (valid directions are asc/desc)", sortDirection))
+			fmt.Println(fmt.Sprintf("%s is not a valid sort order. Valid orders are 'ASC' and 'DESC'.", sortDirection))
 			os.Exit(1)
 		}
 
@@ -89,7 +89,7 @@ func init() {
 	listqCmd.Flags().StringVarP(&sortby, "sortby", "b", "queryTime", "The field in the"+
 		" queries table to use to sort. Valid options include 'queryTime', 'accessFrequency', 'tables', and 'id")
 	listqCmd.Flags().StringVarP(&sortDirection, "sortDirection", "d", "DESC", "the direction to "+
-		"sort, valid options are 'DESC' and 'ASC'")
+		"sort. Valid options are 'ASC' and 'DESC'.")
 
 	rootCmd.AddCommand(listqCmd)
 }

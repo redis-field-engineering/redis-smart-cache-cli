@@ -2,10 +2,11 @@ package RuleTtlView
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/util"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type TableTtlMsg struct {
@@ -52,7 +53,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n\nPress ctrl+b or escape to return to the previous screen\nInput TTL in the form of a duration e.g. 1h, 300s, 5m:\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
+	return fmt.Sprintf("%s\n\nPress [ESC] to return to the previous screen.\nEnter TTL in the form of a duration (e.g. 300s, 5m, 1h):\n%s%s", m.table.Formatted(), m.textInput.View(), m.err)
 }
 
 func New(table *RedisCommon.Table, parentModel tea.Model) Model {

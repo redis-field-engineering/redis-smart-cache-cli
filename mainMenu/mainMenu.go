@@ -2,16 +2,17 @@ package mainMenu
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/redis/go-redis/v9"
 	"io"
 	"smart-cache-cli/ConfirmationDialog"
 	"smart-cache-cli/RuleDialog"
 	"smart-cache-cli/RuleList"
 	"smart-cache-cli/TableList"
 	"smart-cache-cli/queryList"
+
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/redis/go-redis/v9"
 )
 
 const listHeight = 14
@@ -121,13 +122,13 @@ func (m Model) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Exiting. . .")
 	}
-	return "\n" + banner + "\n" + fmt.Sprintf("Connected to: %s for application keyspace: %s\n\n", m.connectionInfo, m.applicationName) + m.list.View() + "\n" + m.message
+	return "\n" + banner + "\n" + fmt.Sprintf("Connected to Redis at '%s' for application keyspace '%s'.\n\n", m.connectionInfo, m.applicationName) + m.list.View() + "\n" + m.message
 }
 
 const (
 	listQueries = "List application queries"
 	listTables  = "List tables"
-	listRules   = "List query caching rule"
+	listRules   = "List query caching rules"
 	createRule  = "Create query caching rule"
 )
 
@@ -142,7 +143,7 @@ func InitialModel(rdb *redis.Client, applicationName string, connectionInfo stri
 	const defaultWidth = 20
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "Select Action"
+	l.Title = "-- Main menu --"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle

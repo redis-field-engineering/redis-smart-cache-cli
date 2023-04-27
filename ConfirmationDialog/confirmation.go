@@ -64,16 +64,16 @@ func (m Model) View() string {
 		noun = "rules"
 	}
 
-	body.WriteString(fmt.Sprintf("Would you like to commit the following %s to Redis?\n", noun))
-	body.WriteString("=============Rules To Commit==============\n")
+	body.WriteString(fmt.Sprintf("Would you like to commit the following caching %s?\n", noun))
+	body.WriteString("============= Rules to Commit ==============\n")
 	for _, r := range m.pendingRules {
 		body.WriteString(r.Formatted())
 		body.WriteString("\n")
 
 	}
 
-	body.WriteString("===========================================\n")
-	body.WriteString("y/N")
+	body.WriteString("============================================\n")
+	body.WriteString("(y)es / (N)o?")
 	return body.String()
 }
 

@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/redis/go-redis/v9"
-	"github.com/spf13/cobra"
 	"os"
 	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/mainMenu"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/redis/go-redis/v9"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -17,12 +18,12 @@ const (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "redis-smartcache-cli",
-	Short: "A CLI for interacting with the Redis Smart Cache",
-	Long: `A CLI for interacting with the Redis Smart Cache, use this to view the results of 
-smart cache profiling and ot create rules that smartcache will use to cache your queries.`,
+	Short: "CLI for interacting with and configuring Redis Smart Cache",
+	Long: `CLI for interacting with and configuring Redis Smart Cache. View Smart Cache 
+query anlytics, create query caching rules, and reset Smart Cache configuration.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if versionCheck {
-			fmt.Printf("Redis Smart Cache CLI Version: v%s\n", version)
+			fmt.Printf("Redis Smart Cache CLI version v%s\n", version)
 			os.Exit(0)
 		}
 		rdb := redis.NewClient(&redis.Options{
@@ -35,20 +36,20 @@ smart cache profiling and ot create rules that smartcache will use to cache your
 		err := RedisCommon.Ping(rdb)
 
 		if err != nil {
-			fmt.Printf("Error encoutnered while connecting to Redis: \"%s\".\n", err.Error())
+			fmt.Printf("Error connecting to Redis: \"%s\".\n", err.Error())
 			os.Exit(1)
 		}
 
 		err = RedisCommon.CheckSmartCacheIndex(rdb, ApplicationName)
 
 		if err != nil {
-			fmt.Printf("Encountered error while checking smart-cache configuration: %s\n", err)
+			fmt.Printf("Error checking Redis Smart Cache configuration: %s\n", err)
 			os.Exit(1)
 		}
 
 		p := tea.NewProgram(mainMenu.InitialModel(rdb, ApplicationName, fmt.Sprintf("%s:%s", HostName, Port)))
 		if res, err := p.Run(); err != nil {
-			fmt.Printf("Alas, there's been an error: %v", err)
+			fmt.Printf("Smart Cache CLI error: %v", err)
 			os.Exit(1)
 		} else {
 			fmt.Println(res.(mainMenu.Model).Choice)
@@ -75,10 +76,10 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&HostName, "host", "n", "localhost", "host to connect to Redis on")
-	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "the port to connect to Redis on")
-	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Password for Redis")
-	rootCmd.PersistentFlags().StringVarP(&User, "user", "u", "default", "User to authenticate to Redis with - defaults to 'default'")
-	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "The application namespace to use defaults to 'smartcache'")
-	rootCmd.Flags().BoolVarP(&versionCheck, "version", "v", false, "Print version.")
+	rootCmd.PersistentFlags().StringVarP(&HostName, "host", "n", "localhost", "Redis host")
+	rootCmd.PersistentFlags().StringVarP(&Port, "port", "p", "6379", "Redis port")
+	rootCmd.PersistentFlags().StringVarP(&Password, "password", "a", "", "Redis password")
+	rootCmd.PersistentFlags().StringVarP(&User, "user", "u", "default", "Redis user. Defaults to 'default'")
+	rootCmd.PersistentFlags().StringVarP(&ApplicationName, "application", "s", "smartcache", "Application namespace. Defaults to 'smartcache'")
+	rootCmd.Flags().BoolVarP(&versionCheck, "version", "v", false, "Smart Cache CLI version")
 }
