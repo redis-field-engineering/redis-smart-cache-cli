@@ -74,11 +74,11 @@ type Model struct {
 	ttl              string
 	match            string
 	textInput        textinput.Model
+	wasPreset        bool
 }
 
-func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string) Model {
+func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confirm bool, applicationName string, ruleType RedisCommon.RuleType) Model {
 	items := []list.Item{
-		item{RedisCommon.QueryIds},
 		item{RedisCommon.Tables},
 		item{RedisCommon.TablesAll},
 		item{RedisCommon.TablesAny},
@@ -93,6 +93,7 @@ func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confi
 	ti.Focus()
 	ti.CharLimit = 30
 	ti.Width = 30
+	wasPreset := ruleType != RedisCommon.Unknown
 
 	m := Model{
 		parentModel:      parentModel,
@@ -101,9 +102,10 @@ func New(parentModel tea.Model, rdb *redis.Client, rule *RedisCommon.Rule, confi
 		isNew:            rule == nil,
 		applicationName:  applicationName,
 		typeSelectorList: typeSelectList,
-		ruleType:         RedisCommon.Unknown,
+		ruleType:         ruleType,
 		textInput:        ti,
 		ttl:              "",
+		wasPreset:        wasPreset,
 	}
 
 	return m
@@ -166,7 +168,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.match != "" {
 				m.match = ""
 				return m, nil
-			} else if m.ruleType != RedisCommon.Unknown {
+			} else if m.ruleType != RedisCommon.Unknown && !m.wasPreset {
 				m.ruleType = RedisCommon.Unknown
 				return m, nil
 			}
@@ -241,16 +243,22 @@ func (m Model) View() string {
 	var b strings.Builder
 
 	if m.ruleType == RedisCommon.Unknown {
-		b.WriteString("Select the type of rule you want to create.\nPress [CTRL+B] to return to the previous screen.\n")
+		b.WriteString("  == Create rule menu ==\n\n  Select the type of rule you want to create.\n  Press [CTRL+B] to return to the previous screen.\n\n")
 		b.WriteString(m.typeSelectorList.View())
 		return b.String()
 	} else if m.match == "" && m.ruleType != RedisCommon.All {
 		b.WriteString(m.ruleSoFar())
-		b.WriteString("Enter the string to match against (e.g., table names, regular expression, etc.): ")
+		if m.ruleType == RedisCommon.Regex {
+			b.WriteString("Enter a regular expression to match against:")
+		} else if m.ruleType == RedisCommon.QueryIds {
+			b.WriteString("Enter a comma-separated list of Query IDs to match against:")
+		} else {
+			b.WriteString("Enter a comma-separated list of tables to match against:")
+		}
 		b.WriteString(m.textInput.View())
 	} else {
 		b.WriteString(m.ruleSoFar())
-		b.WriteString("Enter a TTL in the form of a duration (e.g. 1h, 300s, 5m): ")
+		b.WriteString("Enter a TTL in the form of a duration (e.g. 1h, 300s, 5m):")
 		b.WriteString(m.textInput.View())
 	}
 

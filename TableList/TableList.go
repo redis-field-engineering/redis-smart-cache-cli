@@ -93,7 +93,7 @@ func (m Model) View() string {
 	body := strings.Builder{}
 	body.WriteString("Press [ENTER] to update the TTL for a table\n")
 	body.WriteString("Press 'b' to go back\n")
-	body.WriteString("Press 's' to change sorting\n")
+	body.WriteString("Press 's' to change sorting\n\n")
 	body.WriteString(m.table.View())
 
 	return body.String()

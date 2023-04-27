@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"smart-cache-cli/ConfirmationDialog"
+	"smart-cache-cli/RedisCommon"
 	"smart-cache-cli/RuleDialog"
 	"smart-cache-cli/RuleList"
 	"smart-cache-cli/TableList"
@@ -99,7 +100,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if string(i) == listQueries {
 					return queryList.InitialModel(m, m.rdb, m.applicationName, m.width), nil
 				} else if string(i) == createRule {
-					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName), nil
+					return RuleDialog.New(m, m.rdb, nil, true, m.applicationName, RedisCommon.Unknown), nil
 				} else if string(i) == listRules {
 					return RuleList.New(m, m.rdb, m.applicationName), nil
 				} else if string(i) == listTables {
@@ -143,7 +144,7 @@ func InitialModel(rdb *redis.Client, applicationName string, connectionInfo stri
 	const defaultWidth = 20
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "-- Main menu --"
+	l.Title = "== Main menu =="
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle
