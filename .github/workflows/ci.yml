@@ -17,6 +17,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'graalvm'
+      - run: |
+          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
+            echo ${{ matrix.os }}
+          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            echo ${{ matrix.os }}
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            echo ${{ matrix.os }}
+          fi
       - name: Native build
         run: gradle nativeCompile
       - name: zip
