@@ -32,11 +32,11 @@ jobs:
         shell: bash
         run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            zip -j redis-smart-cache-cli-windows.zip nativeCompile/smart-cache-cli.exe
+            zip -j redis-smart-cache-cli-windows.zip build/native/nativeCompile/smart-cache-cli.exe
           elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
-            zip -j redis-smart-cache-cli-ubuntu.zip nativeCompile/smart-cache-cli
+            zip -j redis-smart-cache-cli-ubuntu.zip build/native/nativeCompile/smart-cache-cli
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
-            zip -j redis-smart-cache-cli-macos.zip nativeCompile/smart-cache-cli
+            zip -j redis-smart-cache-cli-macos.zip build/native/nativeCompile/smart-cache-cli
           fi
       - name: upload
         uses: actions/upload-artifact@v3
