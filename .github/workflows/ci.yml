@@ -17,7 +17,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'graalvm'
-      - run: |
+      - shell: bash
+        run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
             echo ${{ matrix.os }}
           elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
