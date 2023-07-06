@@ -6,8 +6,11 @@ on:
     branches: [main]
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
@@ -16,17 +19,19 @@ jobs:
           distribution: 'graalvm'
       - name: Native build
         run: gradle nativeCompile
-  build-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: graalvm/setup-graalvm@v1
+      - name: zip
+        shell: bash
+        run: |
+          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
+            zip -j redis-smart-cache-cli-windows.zip nativeCompile/smart-cache-cli.exe
+          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            zip -j redis-smart-cache-cli-ubuntu.zip nativeCompile/smart-cache-cli
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            zip -j redis-smart-cache-cli-macos.zip nativeCompile/smart-cache-cli
+          fi
+      - name: upload
+        uses: actions/upload-artifact@v3
         with:
-          java-version: '17'
-          distribution: 'graalvm'
-      - name: ls
-        run: ls -l
-      - name: Gradle Build
-        run: sh ./gradlew build
-      - name: Native Compile
-        run: sh ./gradlew nativeCompile
+            retention-days: 1
+            name: artifacts
+            path: redis-smart-cache-cli-*.zip
