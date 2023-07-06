@@ -15,7 +15,7 @@ jobs:
           java-version: '17'
           distribution: 'graalvm'
       - name: Native build
-        run: gradlew nativeCompile
+        run: .\gradlew nativeCompile
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
