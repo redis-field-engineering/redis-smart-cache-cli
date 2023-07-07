@@ -1,0 +1,80 @@
+assemble:
+  nativeImage:
+    smart-cache-cli:
+      active: ALWAYS
+      java:
+        version: 17
+      executable: smart-cache-cli
+      mainJar:
+        path: build/libs/smart-cache-cli-{{projectVersion}}.jar
+
+project:
+  name: smart-cache-cli  
+  description: The CLI tool for managing Redis Smart Cache
+  longDescription: The CLI tool for managing Redis Smart Cache
+  authors:
+    - Steve Lorello
+  license: MIT
+  links:
+    homepage: https://github.com/slorello89/redis-smart-cache-cli
+  java:
+    groupId: com.redis
+    mainClass: com.redis.smartcache.cli.Application
+    version: 17
+  inceptionYear: 2023
+  stereotype: CLI
+
+
+release:
+  github:
+    overwrite: true
+    issues:
+      enabled: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+      contentTemplate: 'src/jreleaser/changelog.tpl'
+      extraProperties:
+        categorizeScopes: true
+      labelers:
+        - label: 'i18n'
+          title: 'regex:^(?:i18n(?:\(.*\))?!?):\s.*'
+          order: 120
+        - label: 'dependencies'
+          title: 'regex:^(?:deps(?:\(.*\))?!?):\s.*'
+          order: 130
+        - label: 'allcontributors1'
+          title: 'regex:^docs: update .all-contributorsrc.*'
+          order: -1
+        - label: 'allcontributors2'
+          title: 'regex:^docs: update CONTRIBUTORS.md.*'
+          order: -2
+      categories:
+        - title: '🌐 Translation'
+          key: 'i18n'
+          order: 70
+          labels:
+            - 'i18n'
+        - title: '⚙️  Dependencies'
+          key: 'dependencies'
+          order: 80
+          labels:
+            - 'dependencies'
+        - title: 'allcontributors'
+          order: 59
+          labels:
+            - 'allcontributors1'
+            - 'allcontributors2'
+      hide:
+        categories:
+          - 'merge'
+          - 'allcontributors'
+        contributors:
+          - 'GitHub'
+          - 'allcontributors'
+          - 'dependabot'
+      replacers:
+        - search: 'i18n: '
+        - search: 'deps: '{}
