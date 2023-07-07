@@ -6,10 +6,27 @@ on:
     branches: [main]
 
 jobs:
+  build-windows:
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+      - name: Native build
+        run: gradle nativeCompile
+      - name: Zip
+        run: compress-archive -Path .\build\native\nativeCompile\smart-cache-cli.exe -Destination redis-smart-cache-cli-windows.zip
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+            retention-days: 1
+            name: artifacts
+            path: redis-smart-cache-cli-windows.zip
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -19,9 +36,7 @@ jobs:
           distribution: 'graalvm'
       - shell: bash
         run: |
-          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            echo ${{ matrix.os }}
-          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             echo ${{ matrix.os }}
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
             echo ${{ matrix.os }}
@@ -31,9 +46,7 @@ jobs:
       - name: zip
         shell: bash
         run: |
-          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            compress-archive -Path .\build\native\nativeCompile\smart-cache-cli.exe -Destination redis-smart-cache-cli-windows.zip
-          elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             zip -j redis-smart-cache-cli-ubuntu.zip build/native/nativeCompile/smart-cache-cli
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
             zip -j redis-smart-cache-cli-macos.zip build/native/nativeCompile/smart-cache-cli
