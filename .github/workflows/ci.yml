@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            zip -j redis-smart-cache-cli-windows.zip build/native/nativeCompile/smart-cache-cli.exe
+            compress-archive -Path .\build\native\nativeCompile\smart-cache-cli.exe -Destination redis-smart-cache-cli-windows.zip
           elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             zip -j redis-smart-cache-cli-ubuntu.zip build/native/nativeCompile/smart-cache-cli
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
