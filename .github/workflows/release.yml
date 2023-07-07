@@ -26,10 +26,10 @@ jobs:
           git config --global user.email "${{ secrets.COMMIT_EMAIL }}"
           git config --global user.name "Steve Lorello"
           git commit -a -m "Releasing version ${{ github.event.inputs.version }}"
-          git push origin spring
+          git push origin main
   native-Build:
     name: Native Build
     needs: [precheck]
-    uses: slorello89/redis-smart-cache-cli/.github/workflows/native-build.yml@spring
+    uses: slorello89/redis-smart-cache-cli/.github/workflows/native-build.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.version }}
