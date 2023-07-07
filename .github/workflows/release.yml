@@ -6,6 +6,12 @@ on:
       version:
         description: 'Release Version'
         required: true
+
+permissions:
+  actions: write
+  id-token: write
+  contents: write
+
 jobs:
   precheck:
     name: Precheck
