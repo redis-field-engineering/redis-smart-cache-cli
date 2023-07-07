@@ -25,3 +25,7 @@ redis-smartcache-bubbletea
 rsccli
 smart-cache-cli
 dist/
+.gradle
+build
+spring-shell.log
+out

@@ -1,0 +1,65 @@
+name: Native Build
+on:
+  workflow_call:
+    inputs:
+      project-version:
+        required: true
+        type: string
+
+jobs:
+  native-build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+      - name: Native build
+        run: gradle nativeCompile
+      - name: Zip
+        run: compress-archive -Path .\build\native\nativeCompile\smart-cache-cli.exe -Destination redis-smart-cache-cli-${{ inputs.project-version }}-windows.zip
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+            retention-days: 1
+            name: artifacts
+            path: redis-smart-cache-cli-${{ inputs.project-version }}-windows.zip
+  native-build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+      - shell: bash
+        run: |          
+          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            echo ${{ matrix.os }}
+            fileName=redis-smart-cache-cli-${{ inputs.project-version }}-ubuntu.zip
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            echo ${{ matrix.os }}
+            fileName=redis-smart-cache-cli-${{ inputs.project-version }}-macos.zip
+          fi
+      - name: Native build
+        run: gradle nativeCompile
+      - name: zip
+        shell: bash
+        run: |
+          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            fileName=redis-smart-cache-cli-${{ inputs.project-version }}-ubuntu.zip
+            zip -j $fileName build/native/nativeCompile/smart-cache-cli
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            fileName=redis-smart-cache-cli-${{ inputs.project-version }}-macos.zip
+            zip -j $fileName build/native/nativeCompile/smart-cache-cli
+          fi
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+            retention-days: 1
+            name: artifacts
+            path: redis-smart-cache-cli-*.zip
