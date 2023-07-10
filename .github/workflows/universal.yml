@@ -15,7 +15,7 @@ jobs:
           java-version: '17'
           distribution: 'graalvm'
       - name: build
-        run: gradle -Prelease=true -PreproducibleBuild=true -Pversion=${{ inputs.project-version }} build
+        run: gradle -Prelease=true -PreproducibleBuild=true -Pversion=${{ inputs.project-version }} bootJar build
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
