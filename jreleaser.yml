@@ -71,11 +71,24 @@ release:
 
 distributions:
   smart-cache-cli:
+    artifacts:
+      - path: universal/{{distributionName}}-{{projectVersion}}.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
+  smart-cache-cli-native:
     type: BINARY
     artifacts:
-      - path: artifacts/
-      - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
-        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
-        platform: 'osx-aarch_64'
+      - path: artifacts/redis-{{distributionName}}-{{projectVersion}}-osx-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip'
+        platform: 'osx-x86_64'
         extraProperties:
-          graalVMNativeImage: true
+          graalVMNativeImage: 'true'
+      - path: artifacts/redis-{{distributionName}}-{{projectVersion}}-linux-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip'
+        platform: 'linux-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
+      - path: artifacts/redis-{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip'
+        platform: 'windows-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'

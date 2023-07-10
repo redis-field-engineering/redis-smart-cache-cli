@@ -1,0 +1,25 @@
+name: Universal Build
+on:
+  workflow_call:
+    inputs:
+      project-version:
+        required: true
+        type: string
+jobs:
+  build-universal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+      - name: build
+        run: gradle -Prelease=true -PreproducibleBuild=true -Pversion=${{ inputs.project-version }} build
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            retention-days: 5
+            name: universal
+            path: |
+              build/distributions

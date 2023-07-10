@@ -9,8 +9,8 @@ plugins {
 distributions {
 	main {
 		contents {
-			into(''){
-				from nativeCompile
+			into('libs'){
+				from 'build/libs/'
 			}
 		}
 	}
@@ -31,7 +31,6 @@ graalvmNative {
 }
 
 group = 'com.redis.smartcache'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 repositories {
