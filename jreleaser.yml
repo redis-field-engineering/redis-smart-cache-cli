@@ -72,7 +72,7 @@ release:
 distributions:
   smart-cache-cli:
     artifacts:
-      - path: universal/{{distributionName}}-{{projectVersion}}.zip
+      - path: {{distributionName}}-{{projectVersion}}.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
   smart-cache-cli-native:
     type: BINARY
