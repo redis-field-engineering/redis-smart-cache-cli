@@ -18,7 +18,7 @@ jobs:
         run: gradle -Prelease=true -PreproducibleBuild=true -Pversion=${{ inputs.project-version }} build
       - name: zip
         shell: bash
-        run: zip -j build/libs/smart-cache-cli-${{ inputs.project-version }}.jar smart-cache-cli-${{ inputs.project-version }}.zip
+        run: zip -j smart-cache-cli-${{ inputs.project-version }}.zip build/libs/smart-cache-cli-${{ inputs.project-version }}.jar
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
