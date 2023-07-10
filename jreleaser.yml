@@ -77,17 +77,17 @@ distributions:
   smart-cache-cli-native:
     type: BINARY
     artifacts:
-      - path: artifacts/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip
+      - path: {{distributionName}}-{{projectVersion}}-osx-x86_64.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip'
         platform: 'osx-x86_64'
         extraProperties:
           graalVMNativeImage: 'true'
-      - path: artifacts/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip
+      - path: {{distributionName}}-{{projectVersion}}-linux-x86_64.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip'
         platform: 'linux-x86_64'
         extraProperties:
           graalVMNativeImage: 'true'
-      - path: artifacts/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
+      - path: {{distributionName}}-{{projectVersion}}-windows-x86_64.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip'
         platform: 'windows-x86_64'
         extraProperties:
