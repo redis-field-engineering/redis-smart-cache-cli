@@ -34,7 +34,7 @@ jobs:
           git commit -a -m "Releasing version ${{ github.event.inputs.version }}"
           git push origin main
   universal-build:
-    name: Native Build
+    name: Universal Build
     needs: [ precheck ]
     uses: slorello89/redis-smart-cache-cli/.github/workflows/universal.yml@main
     with:
