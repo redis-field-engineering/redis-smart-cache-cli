@@ -33,9 +33,20 @@ jobs:
           git config --global user.name "Steve Lorello"
           git commit -a -m "Releasing version ${{ github.event.inputs.version }}"
           git push origin main
-  native-Build:
+  native-build:
     name: Native Build
     needs: [precheck]
     uses: slorello89/redis-smart-cache-cli/.github/workflows/native-build.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.version }}
+  release:
+    name: Release
+    needs: [precheck, native-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts

@@ -1,13 +1,3 @@
-assemble:
-  nativeImage:
-    smart-cache-cli:
-      active: ALWAYS
-      java:
-        version: 17
-      executable: smart-cache-cli
-      mainJar:
-        path: build/libs/smart-cache-cli-{{projectVersion}}.jar
-
 project:
   name: smart-cache-cli  
   description: The CLI tool for managing Redis Smart Cache
@@ -77,4 +67,15 @@ release:
           - 'dependabot'
       replacers:
         - search: 'i18n: '
-        - search: 'deps: '{}
+        - search: 'deps: '
+
+distributions:
+  smart-cache-cli:
+    type: BINARY
+    artifacts:
+      - path: artifacts/
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
+        platform: 'osx-aarch_64'
+        extraProperties:
+          graalVMNativeImage: true
