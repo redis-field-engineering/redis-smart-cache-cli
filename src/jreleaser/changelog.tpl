@@ -9,8 +9,8 @@
 
 These binaries require an external Java runtime.
 
-* {{#f_release_download_url}}riot-{{projectEffectiveVersion}}.zip{{/f_release_download_url}} (requires Java 11+)
-* {{#f_release_download_url}}riot-{{projectEffectiveVersion}}.tar{{/f_release_download_url}} (requires Java 11+)
+* {{#f_release_download_url}}smart-cache-cli-{{projectEffectiveVersion}}.zip{{/f_release_download_url}} (requires Java 17+)
+* {{#f_release_download_url}}smart-cache-cli-{{projectEffectiveVersion}}.tar{{/f_release_download_url}} (requires Java 17+)
 
 ### ☕️ Native Images
 

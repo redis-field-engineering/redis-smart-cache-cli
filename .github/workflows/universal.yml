@@ -16,10 +16,13 @@ jobs:
           distribution: 'graalvm'
       - name: build
         run: gradle -Prelease=true -PreproducibleBuild=true -Pversion=${{ inputs.project-version }} build
+      - name: zip
+        shell: bash
+        run: zip -j build/libs/smart-cache-cli-${{ inputs.project-version }}.jar smart-cache-cli-${{ inputs.project-version }}.zip
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
             retention-days: 5
             name: universal
             path: |
-              build/libs
+              smart-cache-cli-${{ inputs.project-version }}.zip
