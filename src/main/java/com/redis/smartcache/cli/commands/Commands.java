@@ -162,7 +162,7 @@ public class Commands extends AbstractShellComponent {
     public void createRule(RedisService client){
         Optional<RuleConfig> newRule = newRuleDialogCustom(true);
         if(newRule.isPresent()){
-            List<RuleConfig> rules = client.getRules();
+            List<RuleConfig> rules = new ArrayList<>(client.getRules());
             rules.add(0, newRule.get());
             client.commitRules(rules);
         }
@@ -227,50 +227,64 @@ public class Commands extends AbstractShellComponent {
             @ShellOption(value = {"-p","--port"}, defaultValue = "6379") String port,
             @ShellOption(value = {"-s","--application-name"}, defaultValue = "smartcache") String applicationName
     ){
-        RedisService client = initializeClient(host, port, applicationName);
+        try{
+            RedisService client = initializeClient(host, port, applicationName);
 
-        String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, EXIT};
+            String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, EXIT};
 
-        String nextAction = "";
-        TableSelector.SingleItemSelectorContext<Action, SelectorItem<Action>> context = TableSelector.SingleItemSelectorContext.empty(1, "");
+            String nextAction = "";
+            TableSelector.SingleItemSelectorContext<Action, SelectorItem<Action>> context = TableSelector.SingleItemSelectorContext.empty(1, "");
 
-        while(!nextAction.equals(EXIT)){
+            while(!nextAction.equals(EXIT)){
 
-            List<SelectorItem<Action>> actions = Arrays.stream(options).map(x->SelectorItem.of(x,new Action(x))).collect(Collectors.toList());
-            TableSelector<Action, SelectorItem<Action>> component = new TableSelector<>(getTerminal(),
-                    actions, "Select action", null, "Select Action", true, 1, "");
-            component.setResourceLoader(getResourceLoader());
-            component.setTemplateExecutor(getTemplateExecutor());
+                List<SelectorItem<Action>> actions = Arrays.stream(options).map(x->SelectorItem.of(x,new Action(x))).collect(Collectors.toList());
+                TableSelector<Action, SelectorItem<Action>> component = new TableSelector<>(getTerminal(),
+                        actions, "Select action", null, "Select Action", true, 1, "");
+                component.setResourceLoader(getResourceLoader());
+                component.setTemplateExecutor(getTemplateExecutor());
 
-            context = component.run(context);
+                context = component.run(context);
 
-            if(component.isEscapeMode()){
-                System.exit(0);
-            }
-
-            if(context.getResultItem().isPresent()){
-                nextAction = context.getResultItem().get().getItem().getAction();
-
-                switch (nextAction){
-                    case CREATE_RULE:
-                        createRule(client);
-                        break;
-                    case LIST_APPLICATION_QUERIES:
-                        queryTable(client);
-                        break;
-                    case LIST_TABLES:
-                        tablesTable(client);
-                        break;
-                    case LIST_RULES:
-                        ruleTable(client);
-                        break;
+                if(component.isEscapeMode()){
+                    System.exit(0);
                 }
+
+                if(context.getResultItem().isPresent()){
+                    nextAction = context.getResultItem().get().getItem().getAction();
+
+                    switch (nextAction){
+                        case CREATE_RULE:
+                            createRule(client);
+                            break;
+                        case LIST_APPLICATION_QUERIES:
+                            queryTable(client);
+                            break;
+                        case LIST_TABLES:
+                            tablesTable(client);
+                            break;
+                        case LIST_RULES:
+                            ruleTable(client);
+                            break;
+                    }
+                }
+
+                getTerminal().puts(InfoCmp.Capability.clear_screen);
             }
 
-            getTerminal().puts(InfoCmp.Capability.clear_screen);
+            System.exit(0);
+        }
+        catch (Exception ex){
+            if(ex.getMessage() == null){
+                System.out.printf("Encountered fatal error: %s%nexiting. . .%n", ex);
+                throw ex;
+
+            } else{
+                System.out.printf("Encountered fatal error: %s%nexiting. . .%n", ex.getMessage());
+            }
+
+            System.exit(1);
         }
 
-        System.exit(0);
 
         return "Interactive!";
     }
@@ -386,7 +400,7 @@ public class Commands extends AbstractShellComponent {
                     Optional<Boolean> confirmed = getConfirmation(new RuleInfo(newRule, RuleInfo.Status.New));
                     confirmed.ifPresent(c->{
                         if(c){
-                            List<RuleConfig> rules = client.getRules();
+                            List<RuleConfig> rules = new ArrayList<>(client.getRules());
                             rules.add(0, newRule);
                             client.commitRules(rules);
                         }
@@ -409,7 +423,7 @@ public class Commands extends AbstractShellComponent {
     }
 
     public void queryTable(RedisService client){
-        List<RuleConfig> rules = client.getRules();
+        List<RuleConfig> rules = new ArrayList<>(client.getRules());
 
         Map<Duration, RuleConfig> pendingRules = new HashMap<>();
 
@@ -478,6 +492,7 @@ public class Commands extends AbstractShellComponent {
                 }else{
                     rule = new RuleConfig();
                     rule.setQueryIds(List.of(result.getQueryId()));
+                    rule.setTtl(duration.get());
                     pendingRules.put(duration.get(),rule);
                 }
                 queries.get(context.getCursorRow()).getItem().setPendingRule(rule);
