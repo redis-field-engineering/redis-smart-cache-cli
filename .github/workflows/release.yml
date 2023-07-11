@@ -39,24 +39,17 @@ jobs:
     uses: slorello89/redis-smart-cache-cli/.github/workflows/universal.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.version }}
-#  native-build:
-#    name: Native Build
-#    needs: [precheck]
-#    uses: slorello89/redis-smart-cache-cli/.github/workflows/native-build.yml@main
-#    with:
-#      project-version: ${{ needs.precheck.outputs.version }}
   release:
     name: Release
-#    needs: [precheck, universal-build, native-build]
-    needs: [precheck, universal-build]
+    needs: [precheck, universal-build, native-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-#      - name: Download artifacts
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
       - name: Download universal
         uses: actions/download-artifact@v3
         with:

@@ -123,21 +123,21 @@ distributions:
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
       - path: build/distributions/{{distributionName}}-{{projectVersion}}.tar
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.tar'
-#  smart-cache-cli-native:
-#    type: BINARY
-#    artifacts:
-#      - path: ./{{distributionName}}-{{projectVersion}}-osx-x86_64.zip
-#        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip'
-#        platform: 'osx-x86_64'
-#        extraProperties:
-#          graalVMNativeImage: 'true'
-#      - path: ./{{distributionName}}-{{projectVersion}}-linux-x86_64.zip
-#        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip'
-#        platform: 'linux-x86_64'
-#        extraProperties:
-#          graalVMNativeImage: 'true'
-#      - path: ./{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
-#        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip'
-#        platform: 'windows-x86_64'
-#        extraProperties:
-#          graalVMNativeImage: 'true'
+  smart-cache-cli-native:
+    type: BINARY
+    artifacts:
+      - path: ./{{distributionName}}-{{projectVersion}}-osx-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip'
+        platform: 'osx-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
+      - path: ./{{distributionName}}-{{projectVersion}}-linux-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip'
+        platform: 'linux-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
+      - path: ./{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip'
+        platform: 'windows-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
