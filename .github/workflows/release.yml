@@ -69,3 +69,4 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GIT_ACCESS_TOKEN }}
+          JRELEASER_DOCKER_DEFAULT_PASSWORD: ${{ secrets.JRELEASER_DOCKER_PASSWORD }}
