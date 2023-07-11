@@ -2,7 +2,7 @@
 :project-owner:   redis-field-engineering
 :project-name:    redis-smart-cache-cli
 :project-group:   com.redis
-:project-version: 0.0.7
+:project-version: 0.0.8
 :project-url:     https://github.com/{project-owner}/{project-name}
 :product-name:    Redis Smart Cache CLI
 :property-prefix: smartcache
