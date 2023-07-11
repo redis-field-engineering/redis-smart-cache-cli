@@ -91,8 +91,10 @@ distributions:
           - 'linux/amd64'
           - 'linux/arm64'
     artifacts:
-      - path: ./{{distributionName}}-{{projectVersion}}.zip
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.tar
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.tar'
 #  smart-cache-cli-native:
 #    type: BINARY
 #    artifacts:
