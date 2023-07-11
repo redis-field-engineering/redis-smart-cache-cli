@@ -13,7 +13,11 @@ project:
     version: '17'
   inceptionYear: '2023'
   stereotype: CLI
-
+  tags:
+    - 'redis'
+    - 'caching'
+    - 'smart-cache'
+    - 'data'
 
 release:
   github:
@@ -78,6 +82,23 @@ distributions:
       tap:
         active: RELEASE
         commitMessage: 'smart-cache-cli {{tagName}}'
+    scoop:
+      active: ALWAYS
+      bucket:
+        active: RELEASE
+        commitMessage: 'smart-cache-cli {{tagName}}'
+    jbang:
+      active: ALWAYS
+      alias: smart-cache-cli
+      catalog:
+        commitMessage: 'smart-cache-cli {{tagName}}'
+    chocolatey:
+      active: ALWAYS
+      remoteBuild: true
+      title: Redis Smart Cache CLI
+      bucket:
+        active: RELEASE
+      packageName: smart-cache-cli
 #    docker:
 #      active: ALWAYS
 #      repository:
