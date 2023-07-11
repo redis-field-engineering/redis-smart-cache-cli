@@ -10,8 +10,8 @@ project:
   java:
     groupId: com.redis
     mainClass: com.redis.smartcache.cli.Application
-    version: 17
-  inceptionYear: 2023
+    version: '17'
+  inceptionYear: '2023'
   stereotype: CLI
 
 
@@ -71,25 +71,32 @@ release:
 
 distributions:
   smart-cache-cli:
-    docker:
+    brew:
       active: ALWAYS
-      repository:
-        active: ALWAYS
+      formulaName: smart-cache-cli
+      multiPlatform: true
+      tap:
+        active: RELEASE
         commitMessage: 'smart-cache-cli {{tagName}}'
-      registries:
-        - serverName: DEFAULT
-          username: slorello89
-          repositoryName: fieldengineering
-      labels:
-        'org.opencontainers.image.title': 'smart-cache-cli'
-      imageNames:
-        - 'fieldengineering/{{distributionName}}:{{tagName}}'
-        - 'fieldengineering/{{distributionName}}:latest'
-      buildx:
-        enabled: true
-        platforms:
-          - 'linux/amd64'
-          - 'linux/arm64'
+#    docker:
+#      active: ALWAYS
+#      repository:
+#        active: ALWAYS
+#        commitMessage: 'smart-cache-cli {{tagName}}'
+#      registries:
+#        - serverName: DEFAULT
+#          username: slorello89
+#          repositoryName: fieldengineering
+#      labels:
+#        'org.opencontainers.image.title': 'smart-cache-cli'
+#      imageNames:
+#        - 'fieldengineering/{{distributionName}}:{{tagName}}'
+#        - 'fieldengineering/{{distributionName}}:latest'
+#      buildx:
+#        enabled: true
+#        platforms:
+#          - 'linux/amd64'
+#          - 'linux/arm64'
     artifacts:
       - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
         transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
