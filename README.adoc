@@ -131,7 +131,7 @@ The Smart Cache CLI provides several non-interactive (i.e., scriptable) commands
 The List Queries command lists the queries seen by Smart Cache. Example:
 
 ```
-smart-cache-cli listqueries
+smart-cache-cli list-queries
 ```
 
 image:list-queries.png[List Queries]
@@ -158,9 +158,9 @@ image:list-queries.png[List Queries]
 
 ==== Rule Creation
 
-The `makerule` command lets you create rules on the fly. This command is non-interactive (i.e., scriptable) when you include the `y` flag (to confirm rule creation). See the flag descriptions below for details:
+The `make-rule` command lets you create rules on the fly. This command is non-interactive. See the option descriptions below for details:
 
-===== Rule Creation Flags
+===== Rule Creation Options
 
 [cols="1,1,1,1,1"]
 |===
@@ -172,40 +172,16 @@ The `makerule` command lets you create rules on the fly. This command is non-int
 |The time to live as a duration (e.g. 5m, 300s, 2d) the rule. Essentially, this is how long the query will be cached for.
 |yes
 
-|--confirm
-|-y
-|
-| Provide this flag with a value of `-y` to run this command in non-interactive (i.e., scripted) mode.
-|no
-
-|--queryIds
-|-q
+|--type
+|-k
 |string
-|Comma-delimited unordered list of the IDs of the queries that the rule will apply to.
-|no
+|The rule type for the rule, valid values are 'any', 'tables-any', 'tables-exact', 'tables-all', 'query-ids', 'regex'
+|yes
 
-|--regex
-|-r
+|--match
+|-m
 |string
-|The regex to use to match this rule. If the regex matches, the rule will apply.
-|no
-
-|--tablesAll
-|-l
-|string
-|Comma-delimited unordered set of table names. Matches if **all** of these tables in the set appear in the query (other tables may appear, as well).
-|no
-
-|--tablesAny
-|-x
-|string
-|Comma-delimited unordered set of table names. Matches if **any** of these tables appear in the query.
-|no
-
-|--tablesExact
-|-e
-|string
-|Comma-delimited unordered set of table names. Matches of all of these tables – and no others – appear in the query.
+|What the rule will match against, not required if type is 'any'. Either a comma-delimited list of matches, or a regex.
 |no
 
 |===

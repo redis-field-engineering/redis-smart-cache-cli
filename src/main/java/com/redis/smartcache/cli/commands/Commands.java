@@ -221,6 +221,60 @@ public class Commands extends AbstractShellComponent {
         return sb.toString();
     }
 
+    @ShellMethod(key = "make-rule")
+    public String makeRule(
+            @ShellOption(value = {"-n","--hostname"}, defaultValue = "localhost")String host,
+            @ShellOption(value = {"-p","--port"}, defaultValue = "6379") String port,
+            @ShellOption(value = {"-s","--application-name"}, defaultValue = "smartcache") String applicationName,
+            @ShellOption(value = {"-t","--ttl"}, help = "The time to live for anything matched by the rule, must be in the format of a duration (e.g. 30m, 2h).") String ttlStr,
+            @ShellOption(value = {"-m","--match"}, defaultValue = "", help = "the value(s) for the rule to match against. Required if type is not 'Any'.") String match,
+            @ShellOption(value = {"-k","--type"}, help = "The Rule Type of the rule, valid values are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', 'regex' - required.") String type)
+    {
+        try{
+            Duration ttl = Duration.valueOf(ttlStr);
+            if(!Objects.equals(type.toLowerCase(), "any") && match.isEmpty()){
+                throw new Exception("'match' argument required when 'type' is not 'any'.");
+            }
+            List<String> matchSplit = Arrays.stream(match.split(",")).toList();
+
+            RuleConfig rule = new RuleConfig();
+            rule.setTtl(ttl);
+            switch(type.toLowerCase()){
+                case "any":
+                    break;
+                case "tables-all":
+                    rule.setTablesAll(matchSplit);
+                    break;
+                case "tables-any":
+                    rule.setTablesAny(matchSplit);
+                    break;
+                case "tables-exact":
+                    rule.setTables(matchSplit);
+                    break;
+                case "query-ids":
+                    rule.setQueryIds(matchSplit);
+                    break;
+                case "regex":
+                    rule.setRegex(match);
+                    break;
+                default:
+                    throw new Exception("Could not determine rule type, valid types are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', 'regex'");
+            }
+
+            RedisService client = initializeClient(host, port, applicationName);
+            List<RuleConfig> rules = new ArrayList<>(client.getRules());
+            rules.add(0,rule);
+            client.commitRules(rules);
+        } catch (Exception ex){
+            System.out.printf("Encountered error when making rule:%s%nexiting. . .%n", ex);
+            System.exit(1);
+        }
+
+        System.out.println("Rule Created");
+        System.exit(0);
+        return "Rule Created";
+    }
+
     @ShellMethod(key="Interactive")
     public String interactive(
             @ShellOption(value = {"-n","--hostname"}, defaultValue = "localhost")String host,
