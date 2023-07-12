@@ -1,0 +1,143 @@
+project:
+  name: smart-cache-cli  
+  description: The CLI tool for managing Redis Smart Cache
+  longDescription: The CLI tool for managing Redis Smart Cache
+  authors:
+    - Steve Lorello
+  license: MIT
+  links:
+    homepage: https://github.com/slorello89/redis-smart-cache-cli
+  java:
+    groupId: com.redis
+    mainClass: com.redis.smartcache.cli.Application
+    version: '17'
+  inceptionYear: '2023'
+  stereotype: CLI
+  tags:
+    - 'redis'
+    - 'caching'
+    - 'smart-cache'
+    - 'data'
+
+release:
+  github:
+    overwrite: true
+    issues:
+      enabled: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+      contentTemplate: 'src/jreleaser/changelog.tpl'
+      extraProperties:
+        categorizeScopes: true
+      labelers:
+        - label: 'i18n'
+          title: 'regex:^(?:i18n(?:\(.*\))?!?):\s.*'
+          order: 120
+        - label: 'dependencies'
+          title: 'regex:^(?:deps(?:\(.*\))?!?):\s.*'
+          order: 130
+        - label: 'allcontributors1'
+          title: 'regex:^docs: update .all-contributorsrc.*'
+          order: -1
+        - label: 'allcontributors2'
+          title: 'regex:^docs: update CONTRIBUTORS.md.*'
+          order: -2
+      categories:
+        - title: '🌐 Translation'
+          key: 'i18n'
+          order: 70
+          labels:
+            - 'i18n'
+        - title: '⚙️  Dependencies'
+          key: 'dependencies'
+          order: 80
+          labels:
+            - 'dependencies'
+        - title: 'allcontributors'
+          order: 59
+          labels:
+            - 'allcontributors1'
+            - 'allcontributors2'
+      hide:
+        categories:
+          - 'merge'
+          - 'allcontributors'
+        contributors:
+          - 'GitHub'
+          - 'allcontributors'
+          - 'dependabot'
+      replacers:
+        - search: 'i18n: '
+        - search: 'deps: '
+
+distributions:
+  smart-cache-cli:
+    brew:
+      active: ALWAYS
+      formulaName: smart-cache-cli
+      multiPlatform: true
+      tap:
+        active: RELEASE
+        commitMessage: 'smart-cache-cli {{tagName}}'
+    scoop:
+      active: ALWAYS
+      bucket:
+        active: RELEASE
+        commitMessage: 'smart-cache-cli {{tagName}}'
+    jbang:
+      active: ALWAYS
+      alias: smart-cache-cli
+      catalog:
+        commitMessage: 'smart-cache-cli {{tagName}}'
+    chocolatey:
+      active: ALWAYS
+      remoteBuild: true
+      title: Redis Smart Cache CLI
+      bucket:
+        active: RELEASE
+      packageName: smart-cache-cli
+#    docker:
+#      active: ALWAYS
+#      repository:
+#        active: ALWAYS
+#        commitMessage: 'smart-cache-cli {{tagName}}'
+#      registries:
+#        - serverName: DEFAULT
+#          username: slorello89
+#          repositoryName: fieldengineering
+#      labels:
+#        'org.opencontainers.image.title': 'smart-cache-cli'
+#      imageNames:
+#        - 'fieldengineering/{{distributionName}}:{{tagName}}'
+#        - 'fieldengineering/{{distributionName}}:latest'
+#      buildx:
+#        enabled: true
+#        platforms:
+#          - 'linux/amd64'
+#          - 'linux/arm64'
+    artifacts:
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.zip'
+      - path: build/distributions/{{distributionName}}-{{projectVersion}}.tar
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}.tar'
+  smart-cache-cli-native:
+    type: BINARY
+    artifacts:
+      - path: ./{{distributionName}}-{{projectVersion}}-osx-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip'
+        platform: 'osx-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
+      - path: ./{{distributionName}}-{{projectVersion}}-linux-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.zip'
+        platform: 'linux-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
+      - path: ./{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
+        transform: '{{distributionName}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip'
+        platform: 'windows-x86_64'
+        extraProperties:
+          graalVMNativeImage: 'true'
