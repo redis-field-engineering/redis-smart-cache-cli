@@ -29,6 +29,7 @@ public class Commands extends AbstractShellComponent {
     final String CREATE_RULE = "Create query caching rule";
     final String LIST_TABLES = "List Tables";
     final String LIST_RULES = "List Rules";
+    final String RESET_CONFIG = "Reset Config";
     final String EXIT = "Exit";
 
     final String tableInstructions = "press 'enter' to edit\npress 'c' to commit\npress 'esc' to go back\npress ctrl+c to exit\n";
@@ -284,7 +285,7 @@ public class Commands extends AbstractShellComponent {
         try{
             RedisService client = initializeClient(host, port, applicationName);
 
-            String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, EXIT};
+            String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, RESET_CONFIG, EXIT};
 
             String nextAction = "";
             TableSelector.SingleItemSelectorContext<Action, SelectorItem<Action>> context = TableSelector.SingleItemSelectorContext.empty(1, "");
@@ -319,6 +320,9 @@ public class Commands extends AbstractShellComponent {
                         case LIST_RULES:
                             ruleTable(client);
                             break;
+                        case RESET_CONFIG:
+                            resetConfig(client);
+                            break;
                     }
                 }
 
@@ -341,6 +345,19 @@ public class Commands extends AbstractShellComponent {
 
 
         return "Interactive!";
+    }
+
+    public void resetConfig(RedisService client){
+        String prompt = "Are you sure you want to reset Smart cache's configuration? This will disable all further caching";
+        ConfirmationInputExtension component = new ConfirmationInputExtension(getTerminal(), prompt, false);
+        component.setResourceLoader(getResourceLoader());
+        component.setTemplateExecutor(getTemplateExecutor());
+        ConfirmationInput.ConfirmationInputContext context = component.run(ConfirmationInput.ConfirmationInputContext.empty());
+        if(component.isEscapeMode() || !context.getResultValue()){
+            return;
+        }
+
+        client.commitRules(new ArrayList<>());
     }
 
     public void ruleTable(RedisService client){

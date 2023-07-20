@@ -135,7 +135,7 @@ public class QueryInfo implements RowInfo {
             sb.append("|");
         }
 
-        sb.append(Util.center("Access Frequency", colWidth));
+        sb.append(Util.center("Count", colWidth));
         sb.append("|");
         sb.append(Util.center("Mean Query Time", colWidth));
         sb.append("|");

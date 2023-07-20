@@ -8,6 +8,7 @@ import com.redis.smartcache.cli.structures.QueryInfo;
 import com.redis.smartcache.cli.structures.TableInfo;
 import com.redis.smartcache.core.*;
 import com.redis.smartcache.core.rules.Rule;
+import io.airlift.units.Duration;
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.internal.Futures;
@@ -88,13 +89,21 @@ public class RedisServiceImpl implements RedisService{
 
     public void commitRules(List<RuleConfig> rules){
         Map<String, List<RuleConfig>> map = new HashMap<>();
-        map.put("rules",rules); // TODO: Without this the rules are serialized as ruleNum.attribute.etc - there must be a better way to get it to serialize correctly to rules.ruleNum.attribute.etc
+        if(rules.isEmpty()){
+            RuleConfig defaultRule = new RuleConfig();
+            defaultRule.setTtl(Duration.valueOf("0s"));
+            map.put("rules", Collections.singletonList(defaultRule));
+        }
+        else{
+            map.put("rules",rules);
+        }
+
         JavaPropsMapper mapper = Mappers.propsMapper();
         try{
             Properties props = mapper.writeValueAsProperties(map);
             List<String> listArgs = new ArrayList<>();
 
-            for(Object o : props.keySet().stream().sorted().collect(Collectors.toList())){
+            for(Object o : props.keySet().stream().sorted().toList()){
                 listArgs.add((String)o);
                 listArgs.add((String)props.get(o));
             }

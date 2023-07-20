@@ -115,7 +115,7 @@ image:rule-creation.png[Rule Creation Dialog]
 
 The Table List view provides you a table-level view of the profiling done by Smart Cache.
 
-You can see your tables, their access frequency, and the mean query time for all queries executed against them. You can also see whether a query is cached, including the configured TTL for any cached queries.
+You can see your tables, their query counts, and the mean query time for all queries executed against them. You can also see whether a query is cached, including the configured TTL for any cached queries.
 
 image:table-list.png[Table List]
 

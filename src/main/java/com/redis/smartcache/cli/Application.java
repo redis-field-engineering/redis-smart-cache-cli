@@ -17,7 +17,7 @@ public class Application {
 		app.setLogStartupInfo(false);
 
 		if(Arrays.stream(args).anyMatch(x-> Objects.equals(x, "-v") || Objects.equals(x, "--version"))){
-			System.out.println("v0.0.1");
+			System.out.println("v0.0.9");
 			System.exit(0);
 		}
 
