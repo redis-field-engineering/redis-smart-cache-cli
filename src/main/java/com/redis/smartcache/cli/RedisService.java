@@ -12,4 +12,5 @@ public interface RedisService {
     void commitRules(List<RuleConfig> rules);
     List<RuleConfig> getRules();
     List<TableInfo> getTables();
+    void clearMetrics();
 }

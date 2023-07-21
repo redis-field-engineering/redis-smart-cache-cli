@@ -49,7 +49,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-properties'
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation group: 'io.airlift', name: 'units', version: airliftVersion
-	implementation 'com.redis:lettucemod:3.5.1'
+	implementation 'com.redis:lettucemod:3.6.3'
 	implementation group: 'com.redis', name: 'redis-smart-cache-core', version: '0.3.1'
 }
 

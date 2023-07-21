@@ -30,6 +30,7 @@ public class Commands extends AbstractShellComponent {
     final String LIST_TABLES = "List Tables";
     final String LIST_RULES = "List Rules";
     final String RESET_CONFIG = "Reset Config";
+    final String CLEAR_METRICS = "Clear Metrics";
     final String EXIT = "Exit";
 
     final String tableInstructions = "press 'enter' to edit\npress 'c' to commit\npress 'esc' to go back\npress ctrl+c to exit\n";
@@ -285,7 +286,7 @@ public class Commands extends AbstractShellComponent {
         try{
             RedisService client = initializeClient(host, port, applicationName);
 
-            String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, RESET_CONFIG, EXIT};
+            String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, CLEAR_METRICS, RESET_CONFIG, EXIT};
 
             String nextAction = "";
             TableSelector.SingleItemSelectorContext<Action, SelectorItem<Action>> context = TableSelector.SingleItemSelectorContext.empty(1, "");
@@ -307,22 +308,13 @@ public class Commands extends AbstractShellComponent {
                 if(context.getResultItem().isPresent()){
                     nextAction = context.getResultItem().get().getItem().getAction();
 
-                    switch (nextAction){
-                        case CREATE_RULE:
-                            createRule(client);
-                            break;
-                        case LIST_APPLICATION_QUERIES:
-                            queryTable(client);
-                            break;
-                        case LIST_TABLES:
-                            tablesTable(client);
-                            break;
-                        case LIST_RULES:
-                            ruleTable(client);
-                            break;
-                        case RESET_CONFIG:
-                            resetConfig(client);
-                            break;
+                    switch (nextAction) {
+                        case CREATE_RULE -> createRule(client);
+                        case LIST_APPLICATION_QUERIES -> queryTable(client);
+                        case LIST_TABLES -> tablesTable(client);
+                        case LIST_RULES -> ruleTable(client);
+                        case CLEAR_METRICS -> clearMetrics(client);
+                        case RESET_CONFIG -> resetConfig(client);
                     }
                 }
 
@@ -347,17 +339,26 @@ public class Commands extends AbstractShellComponent {
         return "Interactive!";
     }
 
-    public void resetConfig(RedisService client){
-        String prompt = "Are you sure you want to reset Smart cache's configuration? This will disable all further caching";
-        ConfirmationInputExtension component = new ConfirmationInputExtension(getTerminal(), prompt, false);
+    public boolean confirm(String message){
+        ConfirmationInputExtension component = new ConfirmationInputExtension(getTerminal(), message, false);
         component.setResourceLoader(getResourceLoader());
         component.setTemplateExecutor(getTemplateExecutor());
         ConfirmationInput.ConfirmationInputContext context = component.run(ConfirmationInput.ConfirmationInputContext.empty());
-        if(component.isEscapeMode() || !context.getResultValue()){
-            return;
-        }
+        return !component.isEscapeMode() && context.getResultValue();
+    }
 
-        client.commitRules(new ArrayList<>());
+    public void clearMetrics(RedisService client){
+        String prompt = "Are you sure you want to reset Smart Cache's metrics?";
+        if(confirm(prompt)){
+            client.clearMetrics();
+        }
+    }
+
+    public void resetConfig(RedisService client){
+        String prompt = "Are you sure you want to disable all further Caching from SmartCache?";
+        if(confirm(prompt)){
+            client.commitRules(new ArrayList<>());
+        }
     }
 
     public void ruleTable(RedisService client){

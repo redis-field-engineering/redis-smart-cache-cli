@@ -4,6 +4,8 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.redis.lettucemod.api.StatefulRedisModulesConnection;
 import com.redis.lettucemod.api.async.RediSearchAsyncCommands;
 import com.redis.lettucemod.search.*;
+import com.redis.lettucemod.timeseries.TimeRange;
+import com.redis.lettucemod.timeseries.TimeSeriesCommandBuilder;
 import com.redis.smartcache.cli.structures.QueryInfo;
 import com.redis.smartcache.cli.structures.TableInfo;
 import com.redis.smartcache.core.*;
@@ -12,6 +14,7 @@ import io.airlift.units.Duration;
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.internal.Futures;
+import io.lettuce.core.protocol.RedisCommand;
 
 import java.io.IOException;
 import java.util.*;
@@ -122,7 +125,7 @@ public class RedisServiceImpl implements RedisService{
         String[] groupStrs = {"name"};
         Reducer[] reducers = {new Reducers.Sum.Builder("count").as("accessFrequency").build(), new Reducers.Avg.Builder("mean").as("avgQueryTime").build()};
         AggregateOptions<String,String> options = AggregateOptions.<String,String>builder().operation(new Apply<String,String>("split(@table, ',')", "name")).operation(new Group(groupStrs, reducers)).build();
-        AggregateResults<String> res = connection.sync().ftAggregate("smartcache-query-idx", "*", options);
+        AggregateResults<String> res = connection.sync().ftAggregate(IndexName(conf.getName()), "*", options);
         for(Map<String,Object> item : res){
             String name = item.get("name").toString();
             double avgQueryTime = Double.parseDouble(item.get("avgQueryTime").toString());
@@ -135,5 +138,30 @@ public class RedisServiceImpl implements RedisService{
         }
 
         return tableInfos;
+    }
+
+    public void clearMetrics(){
+        String[] groups = new String[0];
+        Reducer[] reducers = { new Reducers.ToList.Builder("id").as("id").build() };
+        AggregateOptions<String,String> options = AggregateOptions.<String,String>builder().operation(new Group(groups,reducers)).build();
+        AggregateResults<String> res = connection.sync().ftAggregate(IndexName(conf.getName()),"*", options);
+        if(res.size() < 1){
+            return;
+        }
+
+        List<String> ids = (List<String>)res.get(0).get("id");
+        for(String id : ids){
+            List<String> keys = connection.sync().tsQueryIndex(String.format("id=%s",id));
+            try{
+                connection.sync().multi();
+                for(String key : keys){
+                    connection.sync().tsDel(key, TimeRange.from(0).to(Long.MAX_VALUE).build());
+                }
+
+                connection.sync().exec();
+            } catch(Exception e){
+                connection.sync().discard();
+            }
+        }
     }
 }
