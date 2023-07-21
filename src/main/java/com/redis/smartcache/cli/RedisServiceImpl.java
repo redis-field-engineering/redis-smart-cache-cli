@@ -152,15 +152,8 @@ public class RedisServiceImpl implements RedisService{
         List<String> ids = (List<String>)res.get(0).get("id");
         for(String id : ids){
             List<String> keys = connection.sync().tsQueryIndex(String.format("id=%s",id));
-            try{
-                connection.sync().multi();
-                for(String key : keys){
-                    connection.sync().tsDel(key, TimeRange.from(0).to(Long.MAX_VALUE).build());
-                }
-
-                connection.sync().exec();
-            } catch(Exception e){
-                connection.sync().discard();
+            for(String key : keys){
+                connection.sync().tsDel(key, TimeRange.from(0).to(Long.MAX_VALUE).build());
             }
         }
     }
