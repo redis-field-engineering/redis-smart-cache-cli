@@ -31,3 +31,6 @@ spring-shell.log
 out
 artifacts
 universal.zip
+.classpath
+.project
+.settings
