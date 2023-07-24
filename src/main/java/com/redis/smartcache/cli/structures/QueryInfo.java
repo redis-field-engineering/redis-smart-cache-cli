@@ -284,7 +284,7 @@ public class QueryInfo implements RowInfo {
         Builder builder = new Builder();
         builder.setQuery(query);
         if(doc.containsKey("count")){
-            builder.setCount(Long.parseLong(doc.get("count")));
+            builder.setCount(Math.round(Double.parseDouble(doc.get("count"))));
         }
 
         if(doc.containsKey("mean")){
