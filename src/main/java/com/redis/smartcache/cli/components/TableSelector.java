@@ -1,13 +1,23 @@
 package com.redis.smartcache.cli.components;
 
-import com.redis.smartcache.cli.structures.RowInfo;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.springframework.shell.component.context.ComponentContext;
-import org.springframework.shell.component.support.*;
+import org.springframework.shell.component.support.Enableable;
+import org.springframework.shell.component.support.Itemable;
+import org.springframework.shell.component.support.Matchable;
+import org.springframework.shell.component.support.Nameable;
+import org.springframework.shell.component.support.Selectable;
 
-import java.util.*;
-import java.util.function.Function;
+import com.redis.smartcache.cli.structures.RowInfo;
 
 public class TableSelector<T extends RowInfo, I extends Nameable & Matchable & Enableable & Selectable & Itemable<T>>
         extends AbstractTableSelectorComponent<T, TableSelector.SingleItemSelectorContext<T, I>, I> {
@@ -98,6 +108,7 @@ public class TableSelector<T extends RowInfo, I extends Nameable & Matchable & E
     private static class DefaultSingleItemSelectorContext<T extends RowInfo, I extends Nameable & Matchable & Itemable<T>> extends
             BaseSelectorComponentContext<T, I, SingleItemSelectorContext<T, I>> implements SingleItemSelectorContext<T, I> {
 
+        private static final long serialVersionUID = 1L;
         private final String instructions;
         private final int numColumns;
         private String header;

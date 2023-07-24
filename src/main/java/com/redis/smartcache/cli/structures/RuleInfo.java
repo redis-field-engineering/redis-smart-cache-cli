@@ -1,7 +1,6 @@
 package com.redis.smartcache.cli.structures;
 
 import com.redis.smartcache.cli.util.Util;
-import com.redis.smartcache.core.Config;
 import com.redis.smartcache.core.RuleConfig;
 
 public class RuleInfo implements RowInfo {

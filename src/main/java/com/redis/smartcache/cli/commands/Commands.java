@@ -1,13 +1,17 @@
 package com.redis.smartcache.cli.commands;
 
-import com.redis.smartcache.cli.*;
-import com.redis.smartcache.cli.components.ConfirmationInputExtension;
-import com.redis.smartcache.cli.components.StringInputExtension;
-import com.redis.smartcache.cli.components.TableSelector;
-import com.redis.smartcache.cli.structures.*;
-import com.redis.smartcache.cli.util.Util;
-import com.redis.smartcache.core.RuleConfig;
-import org.jline.terminal.impl.DumbTerminal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.jline.utils.InfoCmp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.component.ConfirmationInput;
@@ -17,11 +21,26 @@ import org.springframework.shell.component.support.SelectorItem;
 import org.springframework.shell.standard.AbstractShellComponent;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import io.airlift.units.Duration;
 import org.springframework.shell.standard.ShellOption;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.redis.smartcache.cli.RedisConfig;
+import com.redis.smartcache.cli.RedisService;
+import com.redis.smartcache.cli.RedisServiceImpl;
+import com.redis.smartcache.cli.components.ConfirmationInputExtension;
+import com.redis.smartcache.cli.components.StringInputExtension;
+import com.redis.smartcache.cli.components.TableSelector;
+import com.redis.smartcache.cli.structures.Action;
+import com.redis.smartcache.cli.structures.QueryInfo;
+import com.redis.smartcache.cli.structures.RuleInfo;
+import com.redis.smartcache.cli.structures.RuleType;
+import com.redis.smartcache.cli.structures.RuleTypeInfo;
+import com.redis.smartcache.cli.structures.SortDirection;
+import com.redis.smartcache.cli.structures.SortField;
+import com.redis.smartcache.cli.structures.TableInfo;
+import com.redis.smartcache.cli.util.Util;
+import com.redis.smartcache.core.RuleConfig;
+
+import io.airlift.units.Duration;
 
 @ShellComponent
 public class Commands extends AbstractShellComponent {
