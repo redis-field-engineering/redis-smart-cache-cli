@@ -1,27 +1,39 @@
 package com.redis.smartcache.cli;
 
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
-import com.redis.lettucemod.api.StatefulRedisModulesConnection;
-import com.redis.lettucemod.api.async.RediSearchAsyncCommands;
-import com.redis.lettucemod.search.*;
-import com.redis.lettucemod.timeseries.TimeRange;
-import com.redis.lettucemod.timeseries.TimeSeriesCommandBuilder;
-import com.redis.smartcache.cli.structures.QueryInfo;
-import com.redis.smartcache.cli.structures.TableInfo;
-import com.redis.smartcache.core.*;
-import com.redis.smartcache.core.rules.Rule;
-import io.airlift.units.Duration;
-import io.lettuce.core.AbstractRedisClient;
-import io.lettuce.core.RedisFuture;
-import io.lettuce.core.internal.Futures;
-import io.lettuce.core.protocol.RedisCommand;
+import static com.redis.smartcache.core.RuleSessionManager.KEY_CONFIG;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 
-import static com.redis.smartcache.core.RuleSessionManager.KEY_CONFIG;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.search.AggregateOptions;
+import com.redis.lettucemod.search.AggregateResults;
+import com.redis.lettucemod.search.Apply;
+import com.redis.lettucemod.search.Document;
+import com.redis.lettucemod.search.Group;
+import com.redis.lettucemod.search.Reducer;
+import com.redis.lettucemod.search.Reducers;
+import com.redis.lettucemod.search.SearchResults;
+import com.redis.lettucemod.timeseries.TimeRange;
+import com.redis.smartcache.cli.structures.QueryInfo;
+import com.redis.smartcache.cli.structures.TableInfo;
+import com.redis.smartcache.core.ClientManager;
+import com.redis.smartcache.core.Config;
+import com.redis.smartcache.core.KeyBuilder;
+import com.redis.smartcache.core.Mappers;
+import com.redis.smartcache.core.RuleConfig;
+import com.redis.smartcache.core.RulesetConfig;
+import com.redis.smartcache.core.StreamConfigManager;
+
+import io.airlift.units.Duration;
 
 //@Service
 public class RedisServiceImpl implements RedisService{
@@ -140,6 +152,7 @@ public class RedisServiceImpl implements RedisService{
         return tableInfos;
     }
 
+    @SuppressWarnings("unchecked")
     public void clearMetrics(){
         String[] groups = new String[0];
         Reducer[] reducers = { new Reducers.ToList.Builder("id").as("id").build() };
@@ -149,7 +162,7 @@ public class RedisServiceImpl implements RedisService{
             return;
         }
 
-        List<String> ids = (List<String>)res.get(0).get("id");
+        List<String> ids = (List<String>) res.get(0).get("id");
         for(String id : ids){
             List<String> keys = connection.sync().tsQueryIndex(String.format("id=%s",id));
             for(String key : keys){

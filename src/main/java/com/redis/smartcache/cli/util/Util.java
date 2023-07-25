@@ -1,13 +1,13 @@
 package com.redis.smartcache.cli.util;
 
-import com.redis.smartcache.cli.structures.RuleType;
-import com.redis.smartcache.core.Config;
-import com.redis.smartcache.core.RuleConfig;
-import io.airlift.units.Duration;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.redis.smartcache.cli.structures.RuleType;
+import com.redis.smartcache.core.RuleConfig;
+
+import io.airlift.units.Duration;
 
 public final class Util {
     public static String repeat(char c, int num){
@@ -88,6 +88,9 @@ public final class Util {
                 break;
             case REGEX:
                 rule.setRegex(match);
+                break;
+            case ANY:
+                // do nothing
                 break;
         }
 
