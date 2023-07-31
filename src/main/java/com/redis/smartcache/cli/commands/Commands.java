@@ -46,13 +46,13 @@ import io.airlift.units.Duration;
 public class Commands extends AbstractShellComponent {
     final String LIST_APPLICATION_QUERIES = "List application queries";
     final String CREATE_RULE = "Create query caching rule";
-    final String LIST_TABLES = "List Tables";
-    final String LIST_RULES = "List Rules";
-    final String RESET_CONFIG = "Reset Config";
-    final String CLEAR_METRICS = "Clear Metrics";
+    final String LIST_TABLES = "List database tables";
+    final String LIST_RULES = "List query caching rules";
     final String EXIT = "Exit";
+    final String RESET_CONFIG = "Reset smart cache configuration";
+    final String CLEAR_METRICS = "Clear smart cache metrics";
 
-    final String tableInstructions = "press 'enter' to edit\npress 'c' to commit\npress 'esc' to go back\npress ctrl+c to exit\n";
+    final String tableInstructions = "Press [ENTER] to edit\nPress 'c' to commit\nPress [ESC] to go back\nPress [CTRL+C] to exit\n\n";
 
     @Autowired
     private ComponentFlow.Builder componentFlowBuilder;
@@ -85,13 +85,13 @@ public class Commands extends AbstractShellComponent {
         while(true){
             String prompt;
             if(message.isEmpty()){
-                prompt = "Enter a TTL in the form of a duration (e.g. 1h, 300s, 5m)";
+                prompt = "Enter a TTL in the form of a duration (e.g., 1h, 300s, 5m)";
             }
             else{
-                prompt = String.format("%s%nEnter a TTL in the form of a duration (e.g. 1h, 300s, 5m)",message);
+                prompt = String.format("%s%nEnter a TTL in the form of a duration (e.g., 1h, 300s, 5m)",message);
             }
 
-            prompt += displayError?" - Invalidly formatted duration, please try again:" : ":";
+            prompt += displayError?" - Duration must be a number plus a time unit (e.g., 1h, 3002, 5m). Please try again:" : ":";
 
             StringInputExtension stringInputComponent = new StringInputExtension(getTerminal(), prompt,"30m");
             stringInputComponent.setResourceLoader(getResourceLoader());
@@ -247,14 +247,14 @@ public class Commands extends AbstractShellComponent {
             @ShellOption(value = {"-n","--hostname"}, defaultValue = "localhost")String host,
             @ShellOption(value = {"-p","--port"}, defaultValue = "6379") String port,
             @ShellOption(value = {"-s","--application-name"}, defaultValue = "smartcache") String applicationName,
-            @ShellOption(value = {"-t","--ttl"}, help = "The time to live for anything matched by the rule, must be in the format of a duration (e.g. 30m, 2h).") String ttlStr,
-            @ShellOption(value = {"-m","--match"}, defaultValue = "", help = "the value(s) for the rule to match against. Required if type is not 'Any'.") String match,
-            @ShellOption(value = {"-k","--type"}, help = "The Rule Type of the rule, valid values are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', 'regex' - required.") String type)
+            @ShellOption(value = {"-t","--ttl"}, help = "The time to live for all stored query results. Must be in the format of a duration (e.g., 30m, 2h)") String ttlStr,
+            @ShellOption(value = {"-m","--match"}, defaultValue = "", help = "The value(s) for the rule to match against. Required if type is not 'any'") String match,
+            @ShellOption(value = {"-k","--type"}, help = "The Rule Type (required). Valid values are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', and 'regex'.") String type)
     {
         try{
             Duration ttl = Duration.valueOf(ttlStr);
             if(!Objects.equals(type.toLowerCase(), "any") && match.isEmpty()){
-                throw new Exception("'match' argument required when 'type' is not 'any'.");
+                throw new Exception("Please provide a value for the 'match' argument. This is required when the Rule Type is anything other than 'any'.");
             }
             List<String> matchSplit = Arrays.stream(match.split(",")).toList();
 
@@ -279,7 +279,7 @@ public class Commands extends AbstractShellComponent {
                     rule.setRegex(match);
                     break;
                 default:
-                    throw new Exception("Could not determine rule type, valid types are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', 'regex'");
+                    throw new Exception("Invalid rule type '" + type.toLowerCase() + "'. Valid types are 'any', 'tables-any', 'tables-all', 'tables-exact', 'query-ids', and 'regex'.");
             }
 
             RedisService client = initializeClient(host, port, applicationName);
@@ -287,11 +287,11 @@ public class Commands extends AbstractShellComponent {
             rules.add(0,rule);
             client.commitRules(rules);
         } catch (Exception ex){
-            System.out.printf("Encountered error when making rule:%s%nexiting. . .%n", ex);
+            System.out.printf("Error when making rule: %s%nExiting. . .%n", ex);
             System.exit(1);
         }
 
-        System.out.println("Rule Created");
+        System.out.println("Rule created.");
         System.exit(0);
         return "Rule Created";
     }
@@ -344,11 +344,11 @@ public class Commands extends AbstractShellComponent {
         }
         catch (Exception ex){
             if(ex.getMessage() == null){
-                System.out.printf("Encountered fatal error: %s%nexiting. . .%n", ex);
+                System.out.printf("Encountered fatal error: %s%nExiting. . .%n", ex);
                 throw ex;
 
             } else{
-                System.out.printf("Encountered fatal error: %s%nexiting. . .%n", ex.getMessage());
+                System.out.printf("Encountered fatal error: %s%nExiting. . .%n", ex.getMessage());
             }
 
             System.exit(1);
@@ -367,14 +367,14 @@ public class Commands extends AbstractShellComponent {
     }
 
     public void clearMetrics(RedisService client){
-        String prompt = "Are you sure you want to reset Smart Cache's metrics?";
+        String prompt = "Are you sure you want to reset Redis Smart Cache's metrics?";
         if(confirm(prompt)){
             client.clearMetrics();
         }
     }
 
     public void resetConfig(RedisService client){
-        String prompt = "Are you sure you want to disable all further Caching from SmartCache?";
+        String prompt = "Are you sure you want to disable all caching from Smart Cache?";
         if(confirm(prompt)){
             client.commitRules(new ArrayList<>());
         }
@@ -382,7 +382,7 @@ public class Commands extends AbstractShellComponent {
 
     public void ruleTable(RedisService client){
         List<RuleInfo> rules = client.getRules().stream().map(x->new RuleInfo(x, RuleInfo.Status.Current)).collect(Collectors.toList());
-        String instructions = "Press 'enter' to edit an existing rule\nPress 'n' to create a new rule\nPress 'd' to delete a rule\nPress 'c' to commit\nPress 'esc' to go back\nPress ctrl+c to exit\n";
+        String instructions = "Press [ENTER] to edit an existing rule\nPress 'n' to create a new rule\nPress 'd' to delete a rule\nPress 'c' to commit\nPress [ESC] to go back\nPress [CTRL+C] to exit\n\n";
         int cursorRow = 0;
 
         TableSelector.SingleItemSelectorContext<RuleInfo, SelectorItem<RuleInfo>> context = TableSelector.SingleItemSelectorContext.empty(3, instructions);
@@ -459,7 +459,7 @@ public class Commands extends AbstractShellComponent {
     }
 
     public void tablesTable(RedisService client){
-        String instructions = "press 'enter' to edit\npress 'esc' to go back\npress ctrl+c to exit\n";
+        String instructions = "Press [ENTER] to edit\nPress [ESC] to go back\nPress ctrl+c to exit\n\n";
         int cursorRow = 0;
         TableSelector.SingleItemSelectorContext<TableInfo, SelectorItem<TableInfo>> context = TableSelector.SingleItemSelectorContext.empty(4, instructions);
         while(true){
@@ -483,7 +483,7 @@ public class Commands extends AbstractShellComponent {
                 continue;
             }
             if(!component.isEscapeMode() && res.isPresent()){
-                Optional<Duration> duration = getTtl(String.format("Create rule to cache table:%s", res.get().getName()));
+                Optional<Duration> duration = getTtl(String.format("Create rule to cache table: %s", res.get().getName()));
                 duration.ifPresent(ttl->{
                     RuleConfig newRule = new RuleConfig();
                     newRule.setTtl(ttl);
@@ -539,7 +539,7 @@ public class Commands extends AbstractShellComponent {
                 Optional<Boolean> confirmed = Optional.empty();
                 while(!confirmed.isPresent()){
 
-                    String prompt = "Confirm pending updates y/n";
+                    String prompt = "Confirm pending updates (y/N)";
                     StringInput stringInputComponent = new StringInput(getTerminal(), prompt,"n");
                     stringInputComponent.setResourceLoader(getResourceLoader());
                     stringInputComponent.setTemplateExecutor(getTemplateExecutor());
