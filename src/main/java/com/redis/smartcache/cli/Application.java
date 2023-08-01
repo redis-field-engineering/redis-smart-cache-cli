@@ -32,24 +32,25 @@ public class Application {
 		}
 
 		if(Arrays.stream(args).anyMatch(x->Objects.equals(x,"-h") || Objects.equals(x,"--help"))){
+			System.out.println("Redis Smart Cache CLI\n");
 
-			System.out.println("Help Smart-Cache CLI");
-
-			System.out.println("Usage:");
-			System.out.println();
+			System.out.println("Example Usage:\n");
+			System.out.println("smart-cache-cli -n localhost -p 6379 -s smartcache");
 
 			System.out.println("Options:");
 
-			System.out.println("\t-n --hostname The Redis [h]ost.");
-			System.out.println("\t-p --port The Redis [p]ort.");
-			System.out.println("\t-a --password The Redis p[a]ssword.");
-			System.out.println("\t-u --user The Redis [u]sername.");
-			System.out.println("\t-s --application The Redis application name[s]pace.");
+			System.out.println("\t-n --hostname Redis [h]ost");
+			System.out.println("\t-p --port Redis [p]ort");
+			System.out.println("\t-u --user Redis [u]sername");
+			System.out.println("\t-a --password Redis p[a]ssword");
+			System.out.println("\t-s --application Redis application name[s]pace");
 			System.out.println();
-			System.out.println("Subcommands");
+			System.out.println("Subcommands:");
 			System.out.println("\tlist-queries");
 			System.out.println("\tmake-rule");
 
+			System.out.println("Learn More:");
+			System.out.println("\tTo learn more about Redis Smart Cache, see the README: https://github.com/redis-field-engineering/redis-smart-cache#readme");
 		}
 		else{
 			List<String> appArgs = Arrays.stream(args).collect(Collectors.toList());
