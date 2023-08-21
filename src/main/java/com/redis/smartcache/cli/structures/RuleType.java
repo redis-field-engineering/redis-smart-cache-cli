@@ -6,7 +6,7 @@ public enum RuleType {
     TABLES_ALL("Tables All"),
     REGEX("Regex"),
     QUERY_IDS("Query IDs"),
-    ANY("*");
+    ANY("All Queries");
 
 
     final private String value;
