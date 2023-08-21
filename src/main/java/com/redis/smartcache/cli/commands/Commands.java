@@ -303,7 +303,23 @@ public class Commands extends AbstractShellComponent {
             @ShellOption(value = {"-s","--application-name"}, defaultValue = "smartcache") String applicationName
     ){
         try{
-            RedisService client = initializeClient(host, port, applicationName);
+            RedisService client = null;
+            try{
+                 client = initializeClient(host, port, applicationName);
+            }
+            catch (Exception ex){
+                System.out.printf("Encountered fatal error while connecting to Redis, ensure that Redis is running on host: %s port: %s%n", host, port);
+                System.exit(1);
+            }
+
+            try{
+                client.getQueries();
+            }
+            catch (Exception ex){
+                System.out.printf("Encountered fatal error. Did not detect an Smart Cache application with the name %s in Redis.%n", applicationName);
+                System.exit(1);
+            }
+
 
             String[] options = {LIST_APPLICATION_QUERIES, LIST_TABLES, CREATE_RULE, LIST_RULES, CLEAR_METRICS, RESET_CONFIG, EXIT};
 
