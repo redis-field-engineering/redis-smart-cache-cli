@@ -26,6 +26,7 @@ var listtablesCmd = &cobra.Command{
 			Password: Password,
 			Username: User,
 			DB:       0,
+			Protocol: 2,
 		})
 
 		tables := RedisCommon.GetTables(rdb, ApplicationName)

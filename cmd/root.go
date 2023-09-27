@@ -31,6 +31,7 @@ query anlytics, create query caching rules, and reset Smart Cache configuration.
 			Password: Password,
 			Username: User,
 			DB:       0,
+			Protocol: 2,
 		})
 
 		err := RedisCommon.Ping(rdb)
