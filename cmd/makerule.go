@@ -27,6 +27,7 @@ var makeruleCmd = &cobra.Command{
 			Password: Password,
 			Username: User,
 			DB:       0,
+			Protocol: 2,
 		})
 
 		rule := RedisCommon.Rule{Ttl: ttl}

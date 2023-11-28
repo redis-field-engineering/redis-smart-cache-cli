@@ -41,6 +41,7 @@ var listqCmd = &cobra.Command{
 			Password: Password,
 			Username: User,
 			DB:       0,
+			Protocol: 2,
 		})
 
 		queries, err := RedisCommon.GetQueries(rdb, ApplicationName)
