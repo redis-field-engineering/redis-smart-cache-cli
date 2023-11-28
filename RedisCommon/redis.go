@@ -459,7 +459,7 @@ func GetQueries(rdb *redis.Client, applicationName string) ([]*Query, error) {
 		if !exists {
 			q := new(Query)
 			q.Id = id
-			q.Key = fmt.Sprintf("%s:queries:%s", applicationName, id)
+			q.Key = fmt.Sprintf("%s:query:%s", applicationName, id)
 			queries[id] = q
 		}
 
