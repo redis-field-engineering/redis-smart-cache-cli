@@ -417,8 +417,14 @@ type SearchResult struct {
 
 func ToMap(res []interface{}) map[string]string {
 	m := make(map[string]string, len(res)/2)
-	for i := 0; i < len(res); i += 2 {
-		m[res[i].(string)] = res[i+1].(string)
+	for i := 0; i < len(res)-1; i += 2 {
+		key, ok := res[i].(string)
+		if !ok {
+			continue // skip if the key is not a string
+		}
+
+		val, _ := res[i+1].(string) // default ""
+		m[key] = val
 	}
 	return m
 }
